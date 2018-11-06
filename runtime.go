@@ -63,29 +63,29 @@ func (r *Runtime) ToValue(i interface{}) Value {
 	case bool:
 		return Bool(i)
 	case int:
-		return intNumber(int64(i))
+		return Int(int64(i))
 	case int8:
-		return intNumber(int64(i))
+		return Int(int64(i))
 	case int16:
-		return intNumber(int64(i))
+		return Int(int64(i))
 	case int32:
-		return intNumber(int64(i))
+		return Int(int64(i))
 	case int64:
-		return intNumber(i)
+		return Int(i)
 	case uint:
-		return intNumber(int64(i))
+		return Int(int64(i))
 	case uint8:
-		return intNumber(int64(i))
+		return Int(int64(i))
 	case uint16:
-		return intNumber(int64(i))
+		return Int(int64(i))
 	case uint32:
-		return intNumber(int64(i))
+		return Int(int64(i))
 	case uint64:
-		return intNumber(int64(i))
+		return Int(int64(i))
 	case float32:
-		return floatNumber(float64(i))
+		return Float(float64(i))
 	case float64:
-		return floatNumber(i)
+		return Float(i)
 	case map[string]interface{}:
 		return Map(i)
 	case []interface{}:

@@ -32,9 +32,9 @@ func (s String) ToNumber() Number {
 	t := strings.TrimSpace(string(s))
 	i, err := strconv.ParseInt(t, 0, 64)
 	if err == nil {
-		return intNumber(i)
+		return Int(i)
 	}
-	return floatNumber(s.ToFloat())
+	return Float(s.ToFloat())
 }
 
 func (s String) ToBool() bool { return string(s) != "" }
@@ -56,4 +56,24 @@ func (s String) SameAs(b Value) bool {
 		return false
 	}
 	return string(bs) == string(s)
+}
+
+func (s String) Get(r *Runtime, key Value) Value {
+	switch {
+	case key.IsInt():
+		rs := []rune(s)
+		index := key.ToInt()
+		if index < 0 || index >= int64(len(rs)) {
+			return Null
+		}
+		return String(string(rs[index]))
+	case key.IsString():
+		switch key.ToString() {
+		case "length":
+			rs := []rune(s)
+			return Int(int64(len([]rune(rs))))
+		}
+	}
+
+	return Null
 }

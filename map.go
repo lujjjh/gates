@@ -14,7 +14,7 @@ func (Map) IsBool() bool   { return false }
 func (Map) ToString() string   { return "[object Map]" }
 func (Map) ToInt() int64       { return 0 }
 func (Map) ToFloat() float64   { return math.NaN() }
-func (m Map) ToNumber() Number { return floatNumber(m.ToFloat()) }
+func (m Map) ToNumber() Number { return Float(m.ToFloat()) }
 func (Map) ToBool() bool       { return true }
 
 func (m Map) Equals(other Value) bool { return Value(m) == other }

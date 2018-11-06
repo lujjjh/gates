@@ -10,8 +10,8 @@ type Number struct {
 	f   float64
 }
 
-func intNumber(i int64) Number     { return Number{true, i, 0} }
-func floatNumber(f float64) Number { return Number{false, 0, f} }
+func Int(i int64) Number     { return Number{true, i, 0} }
+func Float(f float64) Number { return Number{false, 0, f} }
 
 func (n Number) IsString() bool { return false }
 func (n Number) IsInt() bool    { return n.isI }

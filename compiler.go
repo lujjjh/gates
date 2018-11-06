@@ -25,10 +25,10 @@ func (c *compiler) compileLit(l *syntax.Lit) {
 		var v Value
 		i, err := strconv.ParseInt(l.Value, 0, 64)
 		if err == nil {
-			v = intNumber(i)
+			v = Int(i)
 		} else {
 			f, _ := strconv.ParseFloat(l.Value, 64)
-			v = floatNumber(f)
+			v = Float(f)
 		}
 		c.emit(load(c.program.defineLit(v)))
 	case syntax.STRING:

@@ -23,7 +23,7 @@ func (b Bool) ToInt() int64 {
 
 func (b Bool) ToFloat() float64 { return float64(b.ToInt()) }
 
-func (b Bool) ToNumber() Number { return intNumber(b.ToInt()) }
+func (b Bool) ToNumber() Number { return Int(b.ToInt()) }
 
 func (b Bool) ToBool() bool { return bool(b) }
 
@@ -31,7 +31,7 @@ func (b Bool) Equals(other Value) bool {
 	if other.IsBool() {
 		return b.SameAs(other)
 	}
-	return other.Equals(intNumber(b.ToInt()))
+	return other.Equals(Int(b.ToInt()))
 }
 
 func (b Bool) SameAs(bv Value) bool {

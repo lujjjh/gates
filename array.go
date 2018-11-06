@@ -24,7 +24,7 @@ func (a Array) ToString() string {
 
 func (Array) ToInt() int64       { return 0 }
 func (Array) ToFloat() float64   { return math.NaN() }
-func (a Array) ToNumber() Number { return floatNumber(a.ToFloat()) }
+func (a Array) ToNumber() Number { return Float(a.ToFloat()) }
 func (Array) ToBool() bool       { return true }
 
 func (a Array) Equals(other Value) bool { return Value(a) == other }

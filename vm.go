@@ -122,9 +122,9 @@ var neg _neg
 func (_neg) exec(vm *vm) {
 	n := vm.stack.Pop().ToNumber()
 	if n.IsInt() {
-		vm.stack.Push(intNumber(-n.ToInt()))
+		vm.stack.Push(Int(-n.ToInt()))
 	} else {
-		vm.stack.Push(floatNumber(-n.ToFloat()))
+		vm.stack.Push(Float(-n.ToFloat()))
 	}
 	vm.pc++
 }
@@ -152,9 +152,9 @@ func (_add) exec(vm *vm) {
 		xStr, yStr := x.ToString(), y.ToString()
 		vm.stack.Push(String(xStr + yStr))
 	case x.IsInt() && y.IsInt():
-		vm.stack.Push(intNumber(x.ToInt() + y.ToInt()))
+		vm.stack.Push(Int(x.ToInt() + y.ToInt()))
 	default:
-		vm.stack.Push(floatNumber(x.ToFloat() + y.ToFloat()))
+		vm.stack.Push(Float(x.ToFloat() + y.ToFloat()))
 	}
 
 	vm.pc++
@@ -170,9 +170,9 @@ func (_sub) exec(vm *vm) {
 
 	switch {
 	case x.IsInt() && y.IsInt():
-		vm.stack.Push(intNumber(x.ToInt() - y.ToInt()))
+		vm.stack.Push(Int(x.ToInt() - y.ToInt()))
 	default:
-		vm.stack.Push(floatNumber(x.ToFloat() - y.ToFloat()))
+		vm.stack.Push(Float(x.ToFloat() - y.ToFloat()))
 	}
 
 	vm.pc++
@@ -192,13 +192,13 @@ func (_mul) exec(vm *vm) {
 		res := xI * yI
 		// overflow
 		if xI != 0 && res/xI != yI {
-			vm.stack.Push(floatNumber(x.ToFloat() * y.ToFloat()))
+			vm.stack.Push(Float(x.ToFloat() * y.ToFloat()))
 			vm.pc++
 			return
 		}
-		vm.stack.Push(intNumber(x.ToInt() * y.ToInt()))
+		vm.stack.Push(Int(x.ToInt() * y.ToInt()))
 	default:
-		vm.stack.Push(floatNumber(x.ToFloat() * y.ToFloat()))
+		vm.stack.Push(Float(x.ToFloat() * y.ToFloat()))
 	}
 
 	vm.pc++
@@ -212,7 +212,7 @@ func (_div) exec(vm *vm) {
 	y := vm.stack.Pop().ToFloat()
 	x := vm.stack.Pop().ToFloat()
 
-	vm.stack.Push(floatNumber(x / y))
+	vm.stack.Push(Float(x / y))
 
 	vm.pc++
 }
@@ -228,13 +228,13 @@ func (_mod) exec(vm *vm) {
 	if x.IsInt() && y.IsInt() {
 		xI, yI := x.ToInt(), y.ToInt()
 		if yI != 0 {
-			vm.stack.Push(intNumber(xI % yI))
+			vm.stack.Push(Int(xI % yI))
 			vm.pc++
 			return
 		}
 	}
 
-	vm.stack.Push(floatNumber(math.Mod(x.ToFloat(), y.ToFloat())))
+	vm.stack.Push(Float(math.Mod(x.ToFloat(), y.ToFloat())))
 	vm.pc++
 }
 
@@ -245,7 +245,7 @@ var and _and
 func (_and) exec(vm *vm) {
 	y := vm.stack.Pop().ToInt()
 	x := vm.stack.Pop().ToInt()
-	vm.stack.Push(intNumber(x & y))
+	vm.stack.Push(Int(x & y))
 	vm.pc++
 }
 
@@ -256,7 +256,7 @@ var or _or
 func (_or) exec(vm *vm) {
 	y := vm.stack.Pop().ToInt()
 	x := vm.stack.Pop().ToInt()
-	vm.stack.Push(intNumber(x | y))
+	vm.stack.Push(Int(x | y))
 	vm.pc++
 }
 
@@ -267,7 +267,7 @@ var xor _xor
 func (_xor) exec(vm *vm) {
 	y := vm.stack.Pop().ToInt()
 	x := vm.stack.Pop().ToInt()
-	vm.stack.Push(intNumber(x ^ y))
+	vm.stack.Push(Int(x ^ y))
 	vm.pc++
 }
 
@@ -278,7 +278,7 @@ var shl _shl
 func (_shl) exec(vm *vm) {
 	y := vm.stack.Pop().ToInt()
 	x := vm.stack.Pop().ToInt()
-	vm.stack.Push(intNumber(x << uint64(y)))
+	vm.stack.Push(Int(x << uint64(y)))
 	vm.pc++
 }
 
@@ -289,7 +289,7 @@ var shr _shr
 func (_shr) exec(vm *vm) {
 	y := vm.stack.Pop().ToInt()
 	x := vm.stack.Pop().ToInt()
-	vm.stack.Push(intNumber(x >> uint64(y)))
+	vm.stack.Push(Int(x >> uint64(y)))
 	vm.pc++
 }
 

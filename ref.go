@@ -16,7 +16,7 @@ func (Ref) IsBool() bool   { return false }
 func (Ref) ToString() string     { return "[object Ref]" }
 func (Ref) ToInt() int64         { return 0 }
 func (Ref) ToFloat() float64     { return math.NaN() }
-func (ref Ref) ToNumber() Number { return floatNumber(ref.ToFloat()) }
+func (ref Ref) ToNumber() Number { return Float(ref.ToFloat()) }
 func (Ref) ToBool() bool         { return true }
 
 func (ref Ref) Equals(other Value) bool {

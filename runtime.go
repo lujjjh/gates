@@ -88,6 +88,8 @@ func (r *Runtime) ToValue(i interface{}) Value {
 		return floatNumber(i)
 	case map[string]interface{}:
 		return Map(i)
+	case []interface{}:
+		return Array(i)
 	default:
 		return Ref{i}
 	}

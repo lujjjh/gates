@@ -108,6 +108,14 @@ func (p *parser) parseSelector(x Expr) Expr {
 	return &SelectorExpr{X: x, Sel: sel}
 }
 
+func (p *parser) parseIndex(x Expr) Expr {
+	lbrack := p.expect(LBRACK)
+	index := p.parseExpr()
+	rbrack := p.expect(RBRACK)
+
+	return &IndexExpr{X: x, Lbrack: lbrack, Index: index, Rbrack: rbrack}
+}
+
 func (p *parser) parsePrimaryExpr() Expr {
 	x := p.parseOperand()
 
@@ -122,6 +130,8 @@ L:
 				p.errorExpected(p.pos, "selector")
 				p.next()
 			}
+		case LBRACK:
+			x = p.parseIndex(x)
 		default:
 			break L
 		}

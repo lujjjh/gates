@@ -50,6 +50,14 @@ type (
 		Sel *Ident
 	}
 
+	IndexExpr struct {
+		expr
+		X      Expr
+		Lbrack Pos
+		Index  Expr
+		Rbrack Pos
+	}
+
 	BadExpr struct {
 		expr
 		From, To Pos

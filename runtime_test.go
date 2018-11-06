@@ -36,7 +36,11 @@ func TestRunString(t *testing.T) {
 	assertValue(t, Bool(true), mustRunString(`"abc" > "aba"`))
 	assertValue(t, String("nullhehe"), mustRunString(`null + "hehe"`))
 
-	assertValue(t, intNumber(42), mustRunStringWithGlobal("a", map[string]interface{}{
-		"a": 42,
+	assertValue(t, intNumber(42), mustRunStringWithGlobal("a.b.c", map[string]interface{}{
+		"a": getterFunc(func(r *Runtime, v Value) Value {
+			return Map(map[string]interface{}{
+				"c": 42,
+			})
+		}),
 	}))
 }

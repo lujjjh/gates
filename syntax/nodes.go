@@ -44,6 +44,12 @@ type (
 		Rparen Pos
 	}
 
+	SelectorExpr struct {
+		expr
+		X   Expr
+		Sel *Ident
+	}
+
 	BadExpr struct {
 		expr
 		From, To Pos

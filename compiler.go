@@ -140,6 +140,12 @@ func (c *compiler) compileBinaryExpr(e *syntax.BinaryExpr) {
 	}
 }
 
+func (c *compiler) compileSelectorExpr(e syntax.Expr, key Value) {
+	c.emit(load(c.program.defineLit(key)))
+	c.compileExpr(e)
+	c.emit(get)
+}
+
 func (c *compiler) compileExpr(e syntax.Expr) {
 	switch e := e.(type) {
 	case *syntax.Ident:
@@ -152,6 +158,8 @@ func (c *compiler) compileExpr(e syntax.Expr) {
 		c.compileBinaryExpr(e)
 	case *syntax.ParenExpr:
 		c.compileExpr(e.X)
+	case *syntax.SelectorExpr:
+		c.compileSelectorExpr(e.X, String(e.Sel.Name))
 	default:
 		panic(fmt.Errorf("unknown expression type: %T", e))
 	}

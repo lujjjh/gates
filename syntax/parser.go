@@ -103,8 +103,30 @@ func (p *parser) parseOperand() Expr {
 	return &BadExpr{From: pos, To: p.pos}
 }
 
+func (p *parser) parseSelector(x Expr) Expr {
+	sel := p.parseIdent()
+	return &SelectorExpr{X: x, Sel: sel}
+}
+
 func (p *parser) parsePrimaryExpr() Expr {
 	x := p.parseOperand()
+
+L:
+	for {
+		switch p.tok {
+		case PERIOD:
+			p.next()
+			if p.tok == IDENT {
+				x = p.parseSelector(x)
+			} else {
+				p.errorExpected(p.pos, "selector")
+				p.next()
+			}
+		default:
+			break L
+		}
+	}
+
 	return x
 }
 

@@ -326,8 +326,11 @@ func (s *Scanner) Scan() (pos Pos, tok Token, lit string) {
 	case isLetter(ch) || ch == '$':
 		tok = IDENT
 		lit = s.scanIdentifier()
-		if lit == "true" || lit == "false" {
+		switch lit {
+		case "true", "false":
 			tok = BOOL
+		case "null":
+			tok = NULL
 		}
 	case '0' <= ch && ch <= '9':
 		tok = NUMBER
@@ -337,7 +340,7 @@ func (s *Scanner) Scan() (pos Pos, tok Token, lit string) {
 		switch ch {
 		case -1:
 			tok = EOF
-		case '"', '\'':
+		case '"':
 			tok = STRING
 			lit = s.scanString(ch)
 		case ':':

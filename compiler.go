@@ -32,6 +32,8 @@ func (c *compiler) compileLit(l *syntax.Lit) {
 		c.emit(load(c.program.defineLit(String(s))))
 	case syntax.BOOL:
 		c.emit(load(c.program.defineLit(Bool(l.Value == "true"))))
+	case syntax.NULL:
+		c.emit(load(c.program.defineLit(Null)))
 	default:
 		panic(fmt.Errorf("unknown token type %v", l.Kind))
 	}

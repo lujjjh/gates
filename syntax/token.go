@@ -18,6 +18,7 @@ const (
 	NUMBER // 123.45
 	STRING // "abc"
 	BOOL   // true
+	NULL   // null
 	literalEnd
 
 	operatorBeg

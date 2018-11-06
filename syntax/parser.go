@@ -84,7 +84,7 @@ func (p *parser) parseOperand() Expr {
 		x := p.parseIdent()
 		return x
 
-	case NUMBER, STRING, BOOL:
+	case NUMBER, STRING, BOOL, NULL:
 		x := &Lit{ValuePos: p.pos, Kind: p.tok, Value: p.lit}
 		p.next()
 		return x

@@ -28,4 +28,5 @@ func TestRunString(t *testing.T) {
 	assertValue(t, Bool(true), mustRunStribng(`"hehe" != ("1" == true)`))
 	assertValue(t, Bool(true), mustRunStribng("1.1 >= 1"))
 	assertValue(t, Bool(true), mustRunStribng(`"abc" > "aba"`))
+	assertValue(t, String("nullhehe"), mustRunStribng(`null + "hehe"`))
 }

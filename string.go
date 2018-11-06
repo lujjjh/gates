@@ -39,6 +39,17 @@ func (s String) ToNumber() Number {
 
 func (s String) ToBool() bool { return string(s) != "" }
 
+func (s String) Equals(other Value) bool {
+	switch {
+	case other.isString():
+		return s.SameAs(other)
+	case other.isInt(), other.isFloat(), other.isBool():
+		return s.ToNumber().Equals(other)
+	default:
+		return false
+	}
+}
+
 func (s String) SameAs(b Value) bool {
 	bs, ok := b.(String)
 	if !ok {

@@ -27,6 +27,13 @@ func (b Bool) ToNumber() Number { return intNumber(b.ToInt()) }
 
 func (b Bool) ToBool() bool { return bool(b) }
 
+func (b Bool) Equals(other Value) bool {
+	if other.isBool() {
+		return b.SameAs(other)
+	}
+	return other.Equals(intNumber(b.ToInt()))
+}
+
 func (b Bool) SameAs(bv Value) bool {
 	bb, ok := bv.(Bool)
 	if !ok {

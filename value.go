@@ -12,5 +12,7 @@ type Value interface {
 	ToNumber() Number
 	ToBool() bool
 
+	Equals(Value) bool
+
 	SameAs(Value) bool
 }

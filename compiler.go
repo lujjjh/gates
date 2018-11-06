@@ -101,6 +101,30 @@ func (c *compiler) compileBinaryExpr(e *syntax.BinaryExpr) {
 		c.program.emit(nil, pop)
 		c.compileExpr(e.Y)
 		c.program.code[j] = jeq1(len(c.program.code) - j)
+	case syntax.EQL:
+		c.compileExpr(e.X)
+		c.compileExpr(e.Y)
+		c.program.emit(eq)
+	case syntax.LSS:
+		c.compileExpr(e.X)
+		c.compileExpr(e.Y)
+		c.program.emit(lt)
+	case syntax.GTR:
+		c.compileExpr(e.X)
+		c.compileExpr(e.Y)
+		c.program.emit(gt)
+	case syntax.NEQ:
+		c.compileExpr(e.X)
+		c.compileExpr(e.Y)
+		c.program.emit(neq)
+	case syntax.LEQ:
+		c.compileExpr(e.X)
+		c.compileExpr(e.Y)
+		c.program.emit(lte)
+	case syntax.GEQ:
+		c.compileExpr(e.X)
+		c.compileExpr(e.Y)
+		c.program.emit(gte)
 	default:
 		panic(fmt.Errorf("unknown binary operator: %s", e.Op))
 	}

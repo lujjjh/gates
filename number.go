@@ -48,6 +48,21 @@ func (n Number) ToBool() bool {
 	return n.f != 0
 }
 
+func (n Number) Equals(other Value) bool {
+	switch {
+	case n.isInt() && other.isInt():
+		return n.ToInt() == other.ToInt()
+	case other.isFloat():
+		return n.ToFloat() == other.ToFloat()
+	case other.isString():
+		return other.ToNumber().Equals(n)
+	case other.isBool():
+		return n.ToInt() == other.ToInt()
+	default:
+		return false
+	}
+}
+
 func (n Number) SameAs(b Value) bool {
 	nb, ok := b.(Number)
 	if !ok {

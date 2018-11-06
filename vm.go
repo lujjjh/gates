@@ -3,6 +3,7 @@ package gates
 import (
 	"container/list"
 	"math"
+	"strings"
 )
 
 type valueStack struct{ l list.List }
@@ -268,6 +269,84 @@ func (_shr) exec(vm *vm) {
 	y := vm.stack.Pop().ToInt()
 	x := vm.stack.Pop().ToInt()
 	vm.stack.Push(intNumber(x >> uint64(y)))
+	vm.pc++
+}
+
+type _eq struct{}
+
+var eq _eq
+
+func (_eq) exec(vm *vm) {
+	y := vm.stack.Pop()
+	x := vm.stack.Pop()
+	vm.stack.Push(Bool(x.Equals(y)))
+	vm.pc++
+}
+
+type _neq struct{}
+
+var neq _neq
+
+func (_neq) exec(vm *vm) {
+	y := vm.stack.Pop()
+	x := vm.stack.Pop()
+	vm.stack.Push(Bool(!x.Equals(y)))
+	vm.pc++
+}
+
+func less(x, y Value) bool {
+	switch {
+	case x.isString() && y.isString():
+		xs, ys := x.ToString(), y.ToString()
+		return strings.Compare(xs, ys) == -1
+	case x.isInt() && y.isInt():
+		return x.ToInt() < y.ToInt()
+	default:
+		return x.ToFloat() < y.ToFloat()
+	}
+}
+
+type _lt struct{}
+
+var lt _lt
+
+func (_lt) exec(vm *vm) {
+	y := vm.stack.Pop()
+	x := vm.stack.Pop()
+	vm.stack.Push(Bool(less(x, y)))
+	vm.pc++
+}
+
+type _lte struct{}
+
+var lte _lte
+
+func (_lte) exec(vm *vm) {
+	y := vm.stack.Pop()
+	x := vm.stack.Pop()
+	vm.stack.Push(Bool(!less(y, x)))
+	vm.pc++
+}
+
+type _gt struct{}
+
+var gt _gt
+
+func (_gt) exec(vm *vm) {
+	y := vm.stack.Pop()
+	x := vm.stack.Pop()
+	vm.stack.Push(Bool(less(y, x)))
+	vm.pc++
+}
+
+type _gte struct{}
+
+var gte _gte
+
+func (_gte) exec(vm *vm) {
+	y := vm.stack.Pop()
+	x := vm.stack.Pop()
+	vm.stack.Push(Bool(!less(x, y)))
 	vm.pc++
 }
 

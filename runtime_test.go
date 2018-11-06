@@ -24,4 +24,8 @@ func TestCompile(t *testing.T) {
 	assertValue(t, String("he he"), mustRunStribng(`"he\x20" + "he"`))
 	assertValue(t, floatNumber(1.5), mustRunStribng(`0 && true || 1.5`))
 	assertValue(t, Bool(true), mustRunStribng(`!(0 && true)`))
+	assertValue(t, Bool(true), mustRunStribng(`1 == "1"`))
+	assertValue(t, Bool(true), mustRunStribng(`"hehe" != ("1" == true)`))
+	assertValue(t, Bool(true), mustRunStribng("1.1 >= 1"))
+	assertValue(t, Bool(true), mustRunStribng(`"abc" > "aba"`))
 }

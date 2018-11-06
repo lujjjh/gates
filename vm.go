@@ -30,6 +30,7 @@ func (v *valueStack) Pop() Value {
 }
 
 type vm struct {
+	r       *Runtime
 	halt    bool
 	pc      int
 	stack   valueStack
@@ -56,12 +57,32 @@ func (index load) exec(vm *vm) {
 	vm.pc++
 }
 
+type _loadGlobal struct{}
+
+var loadGlobal _loadGlobal
+
+func (_loadGlobal) exec(vm *vm) {
+	vm.stack.Push(vm.r.global)
+	vm.pc++
+}
+
 type _pop struct{}
 
 var pop _pop
 
 func (_pop) exec(vm *vm) {
 	vm.stack.Pop()
+	vm.pc++
+}
+
+type _get struct{}
+
+var get _get
+
+func (_get) exec(vm *vm) {
+	base := vm.stack.Pop()
+	key := vm.stack.Pop()
+	vm.stack.Push(objectGet(vm.r, base, key))
 	vm.pc++
 }
 

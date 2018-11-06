@@ -15,6 +15,10 @@ func (c *compiler) emit(instructions ...instruction) {
 	c.program.code = append(c.program.code, instructions...)
 }
 
+func (c *compiler) compileIdent(l *syntax.Ident) {
+	c.emit(load(c.program.defineLit(String(l.Name))), loadGlobal, get)
+}
+
 func (c *compiler) compileLit(l *syntax.Lit) {
 	switch l.Kind {
 	case syntax.NUMBER:
@@ -138,6 +142,8 @@ func (c *compiler) compileBinaryExpr(e *syntax.BinaryExpr) {
 
 func (c *compiler) compileExpr(e syntax.Expr) {
 	switch e := e.(type) {
+	case *syntax.Ident:
+		c.compileIdent(e)
 	case *syntax.Lit:
 		c.compileLit(e)
 	case *syntax.UnaryExpr:

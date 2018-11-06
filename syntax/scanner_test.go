@@ -1,82 +1,78 @@
-package scanner
+package syntax
 
 import (
 	"path/filepath"
 	"testing"
-
-	"github.com/lujjjh/gates/token"
 )
 
-var fset = token.NewFileSet()
-
 type elt struct {
-	tok token.Token
+	tok Token
 	lit string
 }
 
-var tokens = [...]elt{
+var scanTokens = [...]elt{
 	// Identifiers and basic type literals
-	{token.IDENT, "foobar"},
-	{token.IDENT, "$_42"},
-	{token.IDENT, "中国"},
-	{token.NUMBER, "0"},
-	{token.NUMBER, "1"},
-	{token.NUMBER, "123456789012345678890"},
-	{token.NUMBER, "01234567"},
-	{token.NUMBER, "0xcafebabe"},
-	{token.NUMBER, "0."},
-	{token.NUMBER, ".0"},
-	{token.NUMBER, "3.14159265"},
-	{token.NUMBER, "1e0"},
-	{token.NUMBER, "1e+100"},
-	{token.NUMBER, "1e-100"},
-	{token.NUMBER, "2.71828e-1000"},
-	{token.STRING, `"foobar"`},
-	{token.STRING, `'foobar\n\0123\x0020'`},
+	{IDENT, "foobar"},
+	{IDENT, "$_42"},
+	{IDENT, "中国"},
+	{NUMBER, "0"},
+	{NUMBER, "1"},
+	{NUMBER, "123456789012345678890"},
+	{NUMBER, "01234567"},
+	{NUMBER, "0xcafebabe"},
+	{NUMBER, "0."},
+	{NUMBER, ".0"},
+	{NUMBER, "3.14159265"},
+	{NUMBER, "1e0"},
+	{NUMBER, "1e+100"},
+	{NUMBER, "1e-100"},
+	{NUMBER, "2.71828e-1000"},
+	{STRING, `"foobar"`},
+	{STRING, `'foobar\n\0123\x0020'`},
 
 	// Operators and delimiters
-	{token.ADD, "+"},
-	{token.SUB, "-"},
-	{token.MUL, "*"},
-	{token.QUO, "/"},
-	{token.REM, "%"},
+	{ADD, "+"},
+	{SUB, "-"},
+	{MUL, "*"},
+	{QUO, "/"},
+	{REM, "%"},
 
-	{token.AND, "&"},
-	{token.OR, "|"},
-	{token.XOR, "^"},
-	{token.SHL, "<<"},
-	{token.SHR, ">>"},
+	{AND, "&"},
+	{OR, "|"},
+	{XOR, "^"},
+	{SHL, "<<"},
+	{SHR, ">>"},
 
-	{token.LAND, "&&"},
-	{token.LOR, "||"},
+	{LAND, "&&"},
+	{LOR, "||"},
 
-	{token.EQL, "=="},
-	{token.LSS, "<"},
-	{token.GTR, ">"},
-	{token.NOT, "!"},
+	{EQL, "=="},
+	{LSS, "<"},
+	{GTR, ">"},
+	{NOT, "!"},
 
-	{token.NEQ, "!="},
-	{token.LEQ, "<="},
-	{token.GEQ, ">="},
+	{NEQ, "!="},
+	{LEQ, "<="},
+	{GEQ, ">="},
 
-	{token.LPAREN, "("},
-	{token.LBRACK, "["},
-	{token.LBRACE, "{"},
-	{token.COMMA, ","},
-	{token.PERIOD, "."},
+	{LPAREN, "("},
+	{LBRACK, "["},
+	{LBRACE, "{"},
+	{COMMA, ","},
+	{PERIOD, "."},
 
-	{token.RPAREN, ")"},
-	{token.RBRACK, "]"},
-	{token.RBRACE, "}"},
-	{token.SEMICOLON, ";"},
-	{token.COLON, ":"},
+	{RPAREN, ")"},
+	{RBRACK, "]"},
+	{RBRACE, "}"},
+	{SEMICOLON, ";"},
+	{COLON, ":"},
 }
 
 const whitespace = "  \t  \n\n\n" // to separate tokens
 
 var source = func() []byte {
 	var src []byte
-	for _, t := range tokens {
+	for _, t := range scanTokens {
 		src = append(src, t.lit...)
 		src = append(src, whitespace...)
 	}
@@ -93,7 +89,7 @@ func newlineCount(s string) int {
 	return n
 }
 
-func checkPos(t *testing.T, lit string, p token.Pos, expected token.Position) {
+func checkPos(t *testing.T, lit string, p Pos, expected Position) {
 	pos := fset.Position(p)
 	// Check cleaned filenames so that we don't have to worry about
 	// different os.PathSeparator values.
@@ -116,7 +112,7 @@ func TestScan(t *testing.T) {
 	whitespaceLinecount := newlineCount(whitespace)
 
 	// error handler
-	eh := func(_ token.Position, msg string) {
+	eh := func(_ Position, msg string) {
 		t.Errorf("error handler called (msg = %s)", msg)
 	}
 
@@ -125,7 +121,7 @@ func TestScan(t *testing.T) {
 	s.Init(fset.AddFile("", fset.Base(), len(source)), source, eh)
 
 	// set up expected position
-	epos := token.Position{
+	epos := Position{
 		Filename: "",
 		Offset:   0,
 		Line:     1,
@@ -137,7 +133,7 @@ func TestScan(t *testing.T) {
 		pos, tok, lit := s.Scan()
 
 		// check position
-		if tok == token.EOF {
+		if tok == EOF {
 			// correction for EOF
 			epos.Line = newlineCount(string(source))
 			epos.Column = 2
@@ -145,9 +141,9 @@ func TestScan(t *testing.T) {
 		checkPos(t, lit, pos, epos)
 
 		// check token
-		e := elt{token.EOF, ""}
-		if index < len(tokens) {
-			e = tokens[index]
+		e := elt{EOF, ""}
+		if index < len(scanTokens) {
+			e = scanTokens[index]
 			index++
 		}
 		if tok != e.tok {
@@ -157,9 +153,9 @@ func TestScan(t *testing.T) {
 		// check literal
 		elit := ""
 		switch e.tok {
-		case token.IDENT:
+		case IDENT:
 			elit = e.lit
-		case token.SEMICOLON:
+		case SEMICOLON:
 			elit = ";"
 		default:
 			if e.tok.IsLiteral() {
@@ -170,7 +166,7 @@ func TestScan(t *testing.T) {
 			t.Errorf("bad literal for %q: got %q, expected %q", lit, lit, elit)
 		}
 
-		if tok == token.EOF {
+		if tok == EOF {
 			break
 		}
 

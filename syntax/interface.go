@@ -1,11 +1,6 @@
-package parser
+package syntax
 
-import (
-	"github.com/lujjjh/gates/ast"
-	"github.com/lujjjh/gates/token"
-)
-
-func ParseExpr(x string) (e ast.Expr, err error) {
+func ParseExpr(x string) (e Expr, err error) {
 	var p parser
 
 	defer func() {
@@ -20,9 +15,9 @@ func ParseExpr(x string) (e ast.Expr, err error) {
 	}()
 
 	// parse expr
-	p.init(token.NewFileSet(), "", []byte(x))
+	p.init(NewFileSet(), "", []byte(x))
 	e = p.parseExpr()
-	p.expect(token.EOF)
+	p.expect(EOF)
 
 	if p.errors.Len() > 0 {
 		p.errors.Sort()

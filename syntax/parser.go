@@ -1,25 +1,19 @@
-package parser
-
-import (
-	"github.com/lujjjh/gates/ast"
-	"github.com/lujjjh/gates/scanner"
-	"github.com/lujjjh/gates/token"
-)
+package syntax
 
 type parser struct {
-	file    *token.File
-	errors  scanner.ErrorList
-	scanner scanner.Scanner
+	file    *File
+	errors  ErrorList
+	scanner Scanner
 
 	// Next token
-	pos token.Pos   // token position
-	tok token.Token // one token look-ahead
-	lit string      // token literal
+	pos Pos    // token position
+	tok Token  // one token look-ahead
+	lit string // token literal
 }
 
-func (p *parser) init(fset *token.FileSet, filename string, src []byte) {
+func (p *parser) init(fset *FileSet, filename string, src []byte) {
 	p.file = fset.AddFile(filename, -1, len(src))
-	eh := func(pos token.Position, msg string) { p.errors.Add(pos, msg) }
+	eh := func(pos Position, msg string) { p.errors.Add(pos, msg) }
 	p.scanner.Init(p.file, src, eh)
 
 	p.next()
@@ -32,7 +26,7 @@ func (p *parser) next() {
 // A bailout panic is raised to indicate early termination.
 type bailout struct{}
 
-func (p *parser) error(pos token.Pos, msg string) {
+func (p *parser) error(pos Pos, msg string) {
 	epos := p.file.Position(pos)
 
 	// If AllErrors is not set, discard errors reported on the same line
@@ -47,7 +41,7 @@ func (p *parser) error(pos token.Pos, msg string) {
 	panic(bailout{})
 }
 
-func (p *parser) errorExpected(pos token.Pos, msg string) {
+func (p *parser) errorExpected(pos Pos, msg string) {
 	msg = "expected " + msg
 	if pos == p.pos {
 		// the error happened at the current position;
@@ -63,7 +57,7 @@ func (p *parser) errorExpected(pos token.Pos, msg string) {
 	p.error(pos, msg)
 }
 
-func (p *parser) expect(tok token.Token) token.Pos {
+func (p *parser) expect(tok Token) Pos {
 	pos := p.pos
 	if p.tok != tok {
 		p.errorExpected(pos, "'"+tok.String()+"'")
@@ -72,66 +66,66 @@ func (p *parser) expect(tok token.Token) token.Pos {
 	return pos
 }
 
-func (p *parser) parseIdent() *ast.Ident {
+func (p *parser) parseIdent() *Ident {
 	pos := p.pos
 	name := ""
-	if p.tok == token.IDENT {
+	if p.tok == IDENT {
 		name = p.lit
 		p.next()
 	} else {
-		p.expect(token.IDENT) // use expect() error handling
+		p.expect(IDENT) // use expect() error handling
 	}
-	return &ast.Ident{NamePos: pos, Name: name}
+	return &Ident{NamePos: pos, Name: name}
 }
 
-func (p *parser) parseOperand() ast.Expr {
+func (p *parser) parseOperand() Expr {
 	switch p.tok {
-	case token.IDENT:
+	case IDENT:
 		x := p.parseIdent()
 		return x
 
-	case token.NUMBER, token.STRING:
-		x := &ast.Lit{ValuePos: p.pos, Kind: p.tok, Value: p.lit}
+	case NUMBER, STRING, BOOL:
+		x := &Lit{ValuePos: p.pos, Kind: p.tok, Value: p.lit}
 		p.next()
 		return x
 
-	case token.LPAREN:
+	case LPAREN:
 		lparen := p.pos
 		p.next()
 		x := p.parseExpr()
-		rparen := p.expect(token.RPAREN)
-		return &ast.ParenExpr{Lparen: lparen, X: x, Rparen: rparen}
+		rparen := p.expect(RPAREN)
+		return &ParenExpr{Lparen: lparen, X: x, Rparen: rparen}
 	}
 
 	// we have an error
 	pos := p.pos
 	p.errorExpected(pos, "operand")
-	return &ast.BadExpr{From: pos, To: p.pos}
+	return &BadExpr{From: pos, To: p.pos}
 }
 
-func (p *parser) parsePrimaryExpr() ast.Expr {
+func (p *parser) parsePrimaryExpr() Expr {
 	x := p.parseOperand()
 	return x
 }
 
-func (p *parser) parseUnaryExpr() ast.Expr {
+func (p *parser) parseUnaryExpr() Expr {
 	switch p.tok {
-	case token.ADD, token.SUB, token.NOT, token.XOR, token.AND:
+	case ADD, SUB, NOT:
 		pos, op := p.pos, p.tok
 		p.next()
 		x := p.parseUnaryExpr()
-		return &ast.UnaryExpr{OpPos: pos, Op: op, X: x}
+		return &UnaryExpr{OpPos: pos, Op: op, X: x}
 	}
 
 	return p.parsePrimaryExpr()
 }
 
-func (p *parser) tokPrec() (token.Token, int) {
+func (p *parser) tokPrec() (Token, int) {
 	tok := p.tok
 	return tok, tok.Precedence()
 }
 
-func (p *parser) parseBinaryExpr(prec1 int) ast.Expr {
+func (p *parser) parseBinaryExpr(prec1 int) Expr {
 	x := p.parseUnaryExpr()
 	for {
 		op, oprec := p.tokPrec()
@@ -140,10 +134,10 @@ func (p *parser) parseBinaryExpr(prec1 int) ast.Expr {
 		}
 		pos := p.expect(op)
 		y := p.parseBinaryExpr(oprec + 1)
-		x = &ast.BinaryExpr{X: x, OpPos: pos, Op: op, Y: y}
+		x = &BinaryExpr{X: x, OpPos: pos, Op: op, Y: y}
 	}
 }
 
-func (p *parser) parseExpr() ast.Expr {
-	return p.parseBinaryExpr(token.LowestPrec + 1)
+func (p *parser) parseExpr() Expr {
+	return p.parseBinaryExpr(LowestPrec + 1)
 }

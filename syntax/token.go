@@ -1,4 +1,4 @@
-package token
+package syntax
 
 import "strconv"
 
@@ -17,6 +17,7 @@ const (
 	IDENT  // main
 	NUMBER // 123.45
 	STRING // "abc"
+	BOOL   // true
 	literalEnd
 
 	operatorBeg

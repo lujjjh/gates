@@ -1,13 +1,10 @@
-package parser
+package syntax
 
 import (
 	"testing"
-
-	"github.com/lujjjh/gates/ast"
-	"github.com/lujjjh/gates/token"
 )
 
-var fset = token.NewFileSet()
+var fset = NewFileSet()
 
 func TestParseExpr(t *testing.T) {
 	src := "a + b"
@@ -16,8 +13,8 @@ func TestParseExpr(t *testing.T) {
 		t.Errorf("ParseExpr(%q): %v", src, err)
 	}
 	// sanity check
-	if _, ok := x.(*ast.BinaryExpr); !ok {
-		t.Errorf("ParseExpr(%q): got %T, want *ast.BinaryExpr", src, x)
+	if _, ok := x.(*BinaryExpr); !ok {
+		t.Errorf("ParseExpr(%q): got %T, want *BinaryExpr", src, x)
 	}
 
 	// an invalid expression

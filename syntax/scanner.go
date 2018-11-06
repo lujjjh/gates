@@ -1,24 +1,22 @@
-package scanner
+package syntax
 
 import (
 	"fmt"
 	"unicode"
 	"unicode/utf8"
-
-	"github.com/lujjjh/gates/token"
 )
 
 // An ErrorHandler may be provided to Scanner.Init. If a syntax error is
 // encountered and a handler was installed, the handler is called with a
 // position and an error message. The position points to the beginning of
-// the offending token.
+// the offending
 //
-type ErrorHandler func(pos token.Position, msg string)
+type ErrorHandler func(pos Position, msg string)
 
 // Scanner scans tokens.
 type Scanner struct {
 	// immutable state
-	file *token.File
+	file *File
 	src  []byte
 	err  ErrorHandler
 
@@ -71,7 +69,7 @@ func (s *Scanner) next() {
 }
 
 // Init prepares the scanner s to tokenize the text src.
-func (s *Scanner) Init(file *token.File, src []byte, err ErrorHandler) {
+func (s *Scanner) Init(file *File, src []byte, err ErrorHandler) {
 	// Explicitly initialize all fields since a scanner may be reused.
 	if file.Size() != len(src) {
 		panic(fmt.Sprintf("file size (%d) does not match src len (%d)", file.Size(), len(src)))
@@ -108,7 +106,7 @@ func (s *Scanner) skipWhitespace() {
 // respectively. Otherwise, the result is tok0 if there was no other
 // matching character, or tok2 if the matching character was ch2.
 
-func (s *Scanner) switch2(tok0, tok1 token.Token) token.Token {
+func (s *Scanner) switch2(tok0, tok1 Token) Token {
 	if s.ch == '=' {
 		s.next()
 		return tok1
@@ -116,7 +114,7 @@ func (s *Scanner) switch2(tok0, tok1 token.Token) token.Token {
 	return tok0
 }
 
-func (s *Scanner) switch3(tok0, tok1 token.Token, ch2 rune, tok2 token.Token) token.Token {
+func (s *Scanner) switch3(tok0, tok1 Token, ch2 rune, tok2 Token) Token {
 	if s.ch == '=' {
 		s.next()
 		return tok1
@@ -128,7 +126,7 @@ func (s *Scanner) switch3(tok0, tok1 token.Token, ch2 rune, tok2 token.Token) to
 	return tok0
 }
 
-func (s *Scanner) switch4(tok0, tok1 token.Token, ch2 rune, tok2, tok3 token.Token) token.Token {
+func (s *Scanner) switch4(tok0, tok1 Token, ch2 rune, tok2, tok3 Token) Token {
 	if s.ch == '=' {
 		s.next()
 		return tok1
@@ -318,7 +316,7 @@ func (s *Scanner) scanString(quote rune) string {
 }
 
 // Scan scans tokens.
-func (s *Scanner) Scan() (pos token.Pos, tok token.Token, lit string) {
+func (s *Scanner) Scan() (pos Pos, tok Token, lit string) {
 	s.skipWhitespace()
 
 	// current token start
@@ -326,74 +324,77 @@ func (s *Scanner) Scan() (pos token.Pos, tok token.Token, lit string) {
 
 	switch ch := s.ch; {
 	case isLetter(ch) || ch == '$':
-		tok = token.IDENT
+		tok = IDENT
 		lit = s.scanIdentifier()
+		if lit == "true" || lit == "false" {
+			tok = BOOL
+		}
 	case '0' <= ch && ch <= '9':
-		tok = token.NUMBER
+		tok = NUMBER
 		lit = s.scanNumber(false)
 	default:
 		s.next() // always make progress
 		switch ch {
 		case -1:
-			tok = token.EOF
+			tok = EOF
 		case '"', '\'':
-			tok = token.STRING
+			tok = STRING
 			lit = s.scanString(ch)
 		case ':':
-			tok = token.COLON
+			tok = COLON
 		case '.':
 			if '0' <= s.ch && s.ch <= '9' {
-				tok = token.NUMBER
+				tok = NUMBER
 				lit = s.scanNumber(true)
 			} else {
-				tok = token.PERIOD
+				tok = PERIOD
 			}
 		case ',':
-			tok = token.COMMA
+			tok = COMMA
 		case ';':
-			tok = token.SEMICOLON
+			tok = SEMICOLON
 			lit = ";"
 		case '(':
-			tok = token.LPAREN
+			tok = LPAREN
 		case ')':
-			tok = token.RPAREN
+			tok = RPAREN
 		case '[':
-			tok = token.LBRACK
+			tok = LBRACK
 		case ']':
-			tok = token.RBRACK
+			tok = RBRACK
 		case '{':
-			tok = token.LBRACE
+			tok = LBRACE
 		case '}':
-			tok = token.RBRACE
+			tok = RBRACE
 		case '+':
-			tok = token.ADD
+			tok = ADD
 		case '-':
-			tok = token.SUB
+			tok = SUB
 		case '*':
-			tok = token.MUL
+			tok = MUL
 		case '/':
-			tok = token.QUO
+			tok = QUO
 		case '%':
-			tok = token.REM
+			tok = REM
 		case '^':
-			tok = token.XOR
+			tok = XOR
 		case '<':
-			tok = s.switch3(token.LSS, token.LEQ, '<', token.SHL)
+			tok = s.switch3(LSS, LEQ, '<', SHL)
 		case '>':
-			tok = s.switch3(token.GTR, token.GEQ, '>', token.SHR)
+			tok = s.switch3(GTR, GEQ, '>', SHR)
 		case '=':
 			if s.ch == '=' {
 				s.next()
-				tok = token.EQL
+				tok = EQL
 			}
 		case '!':
-			tok = s.switch2(token.NOT, token.NEQ)
+			tok = s.switch2(NOT, NEQ)
 		case '&':
-			tok = s.switch3(token.AND, token.ILLEGAL, '&', token.LAND)
+			tok = s.switch3(AND, ILLEGAL, '&', LAND)
 		case '|':
-			tok = s.switch3(token.OR, token.ILLEGAL, '|', token.LOR)
+			tok = s.switch3(OR, ILLEGAL, '|', LOR)
 		default:
-			tok = token.ILLEGAL
+			tok = ILLEGAL
 			lit = string(ch)
 		}
 	}

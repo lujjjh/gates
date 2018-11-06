@@ -2,10 +2,10 @@ package gates
 
 type Bool bool
 
-func (b Bool) isString() bool { return false }
-func (b Bool) isInt() bool    { return false }
-func (b Bool) isFloat() bool  { return false }
-func (b Bool) isBool() bool   { return true }
+func (b Bool) IsString() bool { return false }
+func (b Bool) IsInt() bool    { return false }
+func (b Bool) IsFloat() bool  { return false }
+func (b Bool) IsBool() bool   { return true }
 
 func (b Bool) ToString() string {
 	if bool(b) {
@@ -28,7 +28,7 @@ func (b Bool) ToNumber() Number { return intNumber(b.ToInt()) }
 func (b Bool) ToBool() bool { return bool(b) }
 
 func (b Bool) Equals(other Value) bool {
-	if other.isBool() {
+	if other.IsBool() {
 		return b.SameAs(other)
 	}
 	return other.Equals(intNumber(b.ToInt()))

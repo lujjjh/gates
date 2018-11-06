@@ -8,10 +8,10 @@ import (
 
 type String string
 
-func (s String) isString() bool { return true }
-func (s String) isInt() bool    { return false }
-func (s String) isFloat() bool  { return false }
-func (s String) isBool() bool   { return false }
+func (s String) IsString() bool { return true }
+func (s String) IsInt() bool    { return false }
+func (s String) IsFloat() bool  { return false }
+func (s String) IsBool() bool   { return false }
 
 func (s String) ToString() string { return string(s) }
 
@@ -41,9 +41,9 @@ func (s String) ToBool() bool { return string(s) != "" }
 
 func (s String) Equals(other Value) bool {
 	switch {
-	case other.isString():
+	case other.IsString():
 		return s.SameAs(other)
-	case other.isInt(), other.isFloat(), other.isBool():
+	case other.IsInt(), other.IsFloat(), other.IsBool():
 		return s.ToNumber().Equals(other)
 	default:
 		return false

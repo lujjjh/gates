@@ -100,7 +100,7 @@ var neg _neg
 
 func (_neg) exec(vm *vm) {
 	n := vm.stack.Pop().ToNumber()
-	if n.isInt() {
+	if n.IsInt() {
 		vm.stack.Push(intNumber(-n.ToInt()))
 	} else {
 		vm.stack.Push(floatNumber(-n.ToFloat()))
@@ -127,10 +127,10 @@ func (_add) exec(vm *vm) {
 	x := vm.stack.Pop()
 
 	switch {
-	case x.isString() || y.isString():
+	case x.IsString() || y.IsString():
 		xStr, yStr := x.ToString(), y.ToString()
 		vm.stack.Push(String(xStr + yStr))
-	case x.isInt() && y.isInt():
+	case x.IsInt() && y.IsInt():
 		vm.stack.Push(intNumber(x.ToInt() + y.ToInt()))
 	default:
 		vm.stack.Push(floatNumber(x.ToFloat() + y.ToFloat()))
@@ -148,7 +148,7 @@ func (_sub) exec(vm *vm) {
 	x := vm.stack.Pop()
 
 	switch {
-	case x.isInt() && y.isInt():
+	case x.IsInt() && y.IsInt():
 		vm.stack.Push(intNumber(x.ToInt() - y.ToInt()))
 	default:
 		vm.stack.Push(floatNumber(x.ToFloat() - y.ToFloat()))
@@ -166,7 +166,7 @@ func (_mul) exec(vm *vm) {
 	x := vm.stack.Pop()
 
 	switch {
-	case x.isInt() && y.isInt():
+	case x.IsInt() && y.IsInt():
 		xI, yI := x.ToInt(), y.ToInt()
 		res := xI * yI
 		// overflow
@@ -204,7 +204,7 @@ func (_mod) exec(vm *vm) {
 	y := vm.stack.Pop()
 	x := vm.stack.Pop()
 
-	if x.isInt() && y.isInt() {
+	if x.IsInt() && y.IsInt() {
 		xI, yI := x.ToInt(), y.ToInt()
 		if yI != 0 {
 			vm.stack.Push(intNumber(xI % yI))
@@ -296,10 +296,10 @@ func (_neq) exec(vm *vm) {
 
 func less(x, y Value) bool {
 	switch {
-	case x.isString() && y.isString():
+	case x.IsString() && y.IsString():
 		xs, ys := x.ToString(), y.ToString()
 		return strings.Compare(xs, ys) == -1
-	case x.isInt() && y.isInt():
+	case x.IsInt() && y.IsInt():
 		return x.ToInt() < y.ToInt()
 	default:
 		return x.ToFloat() < y.ToFloat()

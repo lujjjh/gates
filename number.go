@@ -13,10 +13,10 @@ type Number struct {
 func intNumber(i int64) Number     { return Number{true, i, 0} }
 func floatNumber(f float64) Number { return Number{false, 0, f} }
 
-func (n Number) isString() bool { return false }
-func (n Number) isInt() bool    { return n.isI }
-func (n Number) isFloat() bool  { return !n.isI }
-func (n Number) isBool() bool   { return false }
+func (n Number) IsString() bool { return false }
+func (n Number) IsInt() bool    { return n.isI }
+func (n Number) IsFloat() bool  { return !n.isI }
+func (n Number) IsBool() bool   { return false }
 
 func (n Number) ToString() string {
 	if n.isI {
@@ -50,13 +50,13 @@ func (n Number) ToBool() bool {
 
 func (n Number) Equals(other Value) bool {
 	switch {
-	case n.isInt() && other.isInt():
+	case n.IsInt() && other.IsInt():
 		return n.ToInt() == other.ToInt()
-	case other.isFloat():
+	case other.IsFloat():
 		return n.ToFloat() == other.ToFloat()
-	case other.isString():
+	case other.IsString():
 		return other.ToNumber().Equals(n)
-	case other.isBool():
+	case other.IsBool():
 		return n.ToInt() == other.ToInt()
 	default:
 		return false

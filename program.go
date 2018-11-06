@@ -15,7 +15,3 @@ func (p *Program) defineLit(v Value) uint {
 	p.values = append(p.values, v)
 	return index
 }
-
-func (p *Program) emit(instructions ...instruction) {
-	p.code = append(p.code, instructions...)
-}

@@ -18,7 +18,7 @@ func assertValue(t *testing.T, expected, actual Value) {
 	}
 }
 
-func TestCompile(t *testing.T) {
+func TestRunString(t *testing.T) {
 	assertValue(t, intNumber(34), mustRunStribng("4 + 5 * 6"))
 	assertValue(t, floatNumber(0.5), mustRunStribng("1 / 2"))
 	assertValue(t, String("he he"), mustRunStribng(`"he\x20" + "he"`))

@@ -11,6 +11,10 @@ type compiler struct {
 	program *Program
 }
 
+func (c *compiler) emit(instructions ...instruction) {
+	c.program.code = append(c.program.code, instructions...)
+}
+
 func (c *compiler) compileLit(l *syntax.Lit) {
 	switch l.Kind {
 	case syntax.NUMBER:
@@ -22,12 +26,12 @@ func (c *compiler) compileLit(l *syntax.Lit) {
 			f, _ := strconv.ParseFloat(l.Value, 64)
 			v = floatNumber(f)
 		}
-		c.program.emit(load(c.program.defineLit(v)))
+		c.emit(load(c.program.defineLit(v)))
 	case syntax.STRING:
 		s, _ := strconv.Unquote(l.Value)
-		c.program.emit(load(c.program.defineLit(String(s))))
+		c.emit(load(c.program.defineLit(String(s))))
 	case syntax.BOOL:
-		c.program.emit(load(c.program.defineLit(Bool(l.Value == "true"))))
+		c.emit(load(c.program.defineLit(Bool(l.Value == "true"))))
 	default:
 		panic(fmt.Errorf("unknown token type %v", l.Kind))
 	}
@@ -37,11 +41,11 @@ func (c *compiler) compileUnaryExpr(e *syntax.UnaryExpr) {
 	c.compileExpr(e.X)
 	switch e.Op {
 	case syntax.ADD:
-		c.program.emit(plus)
+		c.emit(plus)
 	case syntax.SUB:
-		c.program.emit(neg)
+		c.emit(neg)
 	case syntax.NOT:
-		c.program.emit(not)
+		c.emit(not)
 	default:
 		panic(fmt.Errorf("unknown unary operator: %s", e.Op))
 	}
@@ -52,79 +56,79 @@ func (c *compiler) compileBinaryExpr(e *syntax.BinaryExpr) {
 	case syntax.ADD:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(add)
+		c.emit(add)
 	case syntax.SUB:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(sub)
+		c.emit(sub)
 	case syntax.MUL:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(mul)
+		c.emit(mul)
 	case syntax.QUO:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(div)
+		c.emit(div)
 	case syntax.REM:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(mod)
+		c.emit(mod)
 	case syntax.AND:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(and)
+		c.emit(and)
 	case syntax.OR:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(or)
+		c.emit(or)
 	case syntax.XOR:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(xor)
+		c.emit(xor)
 	case syntax.SHL:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(shl)
+		c.emit(shl)
 	case syntax.SHR:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(shr)
+		c.emit(shr)
 	case syntax.LAND:
 		c.compileExpr(e.X)
 		j := len(c.program.code)
-		c.program.emit(nil, pop)
+		c.emit(nil, pop)
 		c.compileExpr(e.Y)
 		c.program.code[j] = jneq1(len(c.program.code) - j)
 	case syntax.LOR:
 		c.compileExpr(e.X)
 		j := len(c.program.code)
-		c.program.emit(nil, pop)
+		c.emit(nil, pop)
 		c.compileExpr(e.Y)
 		c.program.code[j] = jeq1(len(c.program.code) - j)
 	case syntax.EQL:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(eq)
+		c.emit(eq)
 	case syntax.LSS:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(lt)
+		c.emit(lt)
 	case syntax.GTR:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(gt)
+		c.emit(gt)
 	case syntax.NEQ:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(neq)
+		c.emit(neq)
 	case syntax.LEQ:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(lte)
+		c.emit(lte)
 	case syntax.GEQ:
 		c.compileExpr(e.X)
 		c.compileExpr(e.Y)
-		c.program.emit(gte)
+		c.emit(gte)
 	default:
 		panic(fmt.Errorf("unknown binary operator: %s", e.Op))
 	}
@@ -147,5 +151,5 @@ func (c *compiler) compileExpr(e syntax.Expr) {
 
 func (c *compiler) compile(e syntax.Expr) {
 	c.compileExpr(e)
-	c.program.emit(halt)
+	c.emit(halt)
 }

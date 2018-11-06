@@ -27,3 +27,14 @@ func (ref Ref) Equals(other Value) bool {
 }
 
 func (ref Ref) SameAs(other Value) bool { return ref.Equals(other) }
+
+func ref(v interface{}) Ref {
+	if r, ok := v.(Ref); ok {
+		return r
+	}
+	return Ref{v}
+}
+
+func unref(v interface{}) interface{} { return ref(v).v }
+
+func NewRef(v interface{}) Ref { return ref(v) }

@@ -5,6 +5,7 @@ type getter interface {
 }
 
 func objectGet(r *Runtime, base interface{}, key Value) Value {
+	base = unref(base)
 	g, ok := base.(getter)
 	if !ok {
 		m, ok := base.(map[string]interface{})

@@ -61,7 +61,7 @@ func (s String) SameAs(b Value) bool {
 func (s String) Get(r *Runtime, key Value) Value {
 	switch {
 	case key.IsInt():
-		rs := []rune(s)
+		rs := []rune(string(s))
 		index := key.ToInt()
 		if index < 0 || index >= int64(len(rs)) {
 			return Null
@@ -70,7 +70,7 @@ func (s String) Get(r *Runtime, key Value) Value {
 	case key.IsString():
 		switch key.ToString() {
 		case "length":
-			rs := []rune(s)
+			rs := []rune(string(s))
 			return Int(int64(len([]rune(rs))))
 		}
 	}

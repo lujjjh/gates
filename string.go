@@ -4,6 +4,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 type String string
@@ -61,17 +62,21 @@ func (s String) SameAs(b Value) bool {
 func (s String) Get(r *Runtime, key Value) Value {
 	switch {
 	case key.IsInt():
-		rs := []rune(string(s))
 		index := key.ToInt()
-		if index < 0 || index >= int64(len(rs)) {
+		if index < 0 {
 			return Null
 		}
-		return String(string(rs[index]))
+		for _, r := range string(s) {
+			if index == 0 {
+				return String(string(r))
+			}
+			index--
+		}
+		return Null
 	case key.IsString():
 		switch key.ToString() {
 		case "length":
-			rs := []rune(string(s))
-			return Int(int64(len([]rune(rs))))
+			return Int(int64(utf8.RuneCountInString(string(s))))
 		}
 	}
 

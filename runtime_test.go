@@ -50,6 +50,8 @@ func TestRunString(t *testing.T) {
 
 	assertValue(t, Int(4), mustRunString(`("he" + "he").length`))
 	assertValue(t, String("e"), mustRunString(`"hehe"[1]`))
+	assertValue(t, Null, mustRunString(`"hehe"[-1]`))
+	assertValue(t, Null, mustRunString(`"hehe"[4]`))
 }
 
 func BenchmarkRunProgram(b *testing.B) {

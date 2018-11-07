@@ -31,6 +31,11 @@ func New() *Runtime {
 
 func (r *Runtime) init() {
 	r.vm = &vm{r: r}
+	r.vm.init()
+}
+
+func (r *Runtime) Reset() {
+	r.vm.init()
 }
 
 func (r *Runtime) SetGlobal(global interface{}) {

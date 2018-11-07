@@ -1,32 +1,47 @@
 package gates
 
 import (
-	"container/list"
 	"math"
 	"strings"
 )
 
-type valueStack struct{ l list.List }
+type valueStack struct {
+	l  []Value
+	sp int
+}
+
+func (v *valueStack) init() {
+	v.l = v.l[:0]
+	v.sp = 0
+}
+
+func (v *valueStack) expand(idx int) {
+	if idx < len(v.l) {
+		return
+	}
+
+	if idx < cap(v.l) {
+		v.l = v.l[:idx+1]
+	} else {
+		n := make([]Value, idx+1, (idx+1)<<1)
+		copy(n, v.l)
+		v.l = n
+	}
+}
 
 func (v *valueStack) Push(value Value) {
-	v.l.PushBack(value)
+	v.expand(v.sp)
+	v.l[v.sp] = value
+	v.sp++
 }
 
 func (v *valueStack) Peek() Value {
-	e := v.l.Back()
-	if e == nil {
-		return nil
-	}
-	return e.Value.(Value)
+	return v.l[v.sp-1]
 }
 
 func (v *valueStack) Pop() Value {
-	e := v.l.Back()
-	if e == nil {
-		return nil
-	}
-	v.l.Remove(e)
-	return e.Value.(Value)
+	v.sp--
+	return v.l[v.sp]
 }
 
 type vm struct {
@@ -35,6 +50,17 @@ type vm struct {
 	pc      int
 	stack   valueStack
 	program *Program
+}
+
+func (vm *vm) init() {
+	vm.stack.init()
+}
+
+func (vm *vm) run() {
+	vm.halt = false
+	for !vm.halt {
+		vm.program.code[vm.pc].exec(vm)
+	}
 }
 
 type instruction interface {
@@ -369,11 +395,4 @@ func (_gte) exec(vm *vm) {
 	x := vm.stack.Pop()
 	vm.stack.Push(Bool(!less(x, y)))
 	vm.pc++
-}
-
-func (vm *vm) run() {
-	vm.halt = false
-	for !vm.halt {
-		vm.program.code[vm.pc].exec(vm)
-	}
 }

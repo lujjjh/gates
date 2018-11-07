@@ -51,3 +51,19 @@ func TestRunString(t *testing.T) {
 	assertValue(t, Int(4), mustRunString(`("he" + "he").length`))
 	assertValue(t, String("e"), mustRunString(`"hehe"[1]`))
 }
+
+func BenchmarkRunProgram(b *testing.B) {
+	program, err := Compile(`"hello"[0] + 1 && false`)
+	if err != nil {
+		panic(err)
+	}
+
+	b.ResetTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		r := New()
+		for pb.Next() {
+			r.Reset()
+			r.RunProgram(program)
+		}
+	})
+}

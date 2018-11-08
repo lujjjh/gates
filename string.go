@@ -7,30 +7,32 @@ import (
 	"unicode/utf8"
 )
 
-type String string
+type _String struct{ s string }
 
-func (s String) IsString() bool { return true }
-func (s String) IsInt() bool    { return false }
-func (s String) IsFloat() bool  { return false }
-func (s String) IsBool() bool   { return false }
+func String(s string) _String { return _String{s} }
 
-func (s String) ToString() string { return string(s) }
+func (s _String) IsString() bool { return true }
+func (s _String) IsInt() bool    { return false }
+func (s _String) IsFloat() bool  { return false }
+func (s _String) IsBool() bool   { return false }
 
-func (s String) ToInt() int64 {
-	i, _ := strconv.ParseInt(string(s), 0, 64)
+func (s _String) ToString() string { return s.s }
+
+func (s _String) ToInt() int64 {
+	i, _ := strconv.ParseInt(s.s, 0, 64)
 	return i
 }
 
-func (s String) ToFloat() float64 {
-	f, err := strconv.ParseFloat(string(s), 64)
+func (s _String) ToFloat() float64 {
+	f, err := strconv.ParseFloat(s.s, 64)
 	if err != nil {
 		return math.NaN()
 	}
 	return f
 }
 
-func (s String) ToNumber() Number {
-	t := strings.TrimSpace(string(s))
+func (s _String) ToNumber() Number {
+	t := strings.TrimSpace(s.s)
 	i, err := strconv.ParseInt(t, 0, 64)
 	if err == nil {
 		return Int(i)
@@ -38,9 +40,9 @@ func (s String) ToNumber() Number {
 	return Float(s.ToFloat())
 }
 
-func (s String) ToBool() bool { return string(s) != "" }
+func (s _String) ToBool() bool { return s.s != "" }
 
-func (s String) Equals(other Value) bool {
+func (s _String) Equals(other Value) bool {
 	switch {
 	case other.IsString():
 		return s.SameAs(other)
@@ -51,32 +53,40 @@ func (s String) Equals(other Value) bool {
 	}
 }
 
-func (s String) SameAs(b Value) bool {
-	bs, ok := b.(String)
+func (s _String) SameAs(b Value) bool {
+	bs, ok := b.(_String)
 	if !ok {
 		return false
 	}
-	return string(bs) == string(s)
+	return bs.s == s.s
 }
 
-func (s String) Get(r *Runtime, key Value) Value {
+func (s _String) Get(r *Runtime, key Value) Value {
 	switch {
 	case key.IsInt():
-		index := key.ToInt()
+		index := int(key.ToInt())
 		if index < 0 {
 			return Null
 		}
-		for _, r := range string(s) {
-			if index == 0 {
-				return String(string(r))
+		i := 0
+		start := -1
+		for j := range s.s {
+			if i == index {
+				start = j
 			}
-			index--
+			if i == index+1 {
+				return String(string(s.s[start:j]))
+			}
+			i++
 		}
-		return Null
+		if start == -1 {
+			return Null
+		}
+		return String(string(s.s[start:]))
 	case key.IsString():
 		switch key.ToString() {
 		case "length":
-			return Int(int64(utf8.RuneCountInString(string(s))))
+			return Int(int64(utf8.RuneCountInString(string(s.s))))
 		}
 	}
 

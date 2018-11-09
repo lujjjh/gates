@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-type Map map[string]interface{}
+type Map map[string]Value
 
 func (Map) IsString() bool   { return false }
 func (Map) IsInt() bool      { return false }

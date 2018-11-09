@@ -1,5 +1,9 @@
 package syntax
 
+import (
+	"strconv"
+)
+
 type parser struct {
 	file    *File
 	errors  ErrorList
@@ -78,6 +82,60 @@ func (p *parser) parseIdent() *Ident {
 	return &Ident{NamePos: pos, Name: name}
 }
 
+func (p *parser) parseArrayLit() *ArrayLit {
+	lbrack := p.expect(LBRACK)
+	var elemList []Expr
+	if p.tok != RBRACK {
+		for {
+			elem := p.parseExpr()
+			elemList = append(elemList, elem)
+			if p.tok != COMMA {
+				break
+			}
+			p.next()
+		}
+	}
+	rbrack := p.expect(RBRACK)
+	return &ArrayLit{
+		Lbrack:   lbrack,
+		ElemList: elemList,
+		Rbrack:   rbrack,
+	}
+}
+
+func (p *parser) parseMapLit() *MapLit {
+	lbrace := p.expect(LBRACE)
+	var entries []MapLitEntry
+	if p.tok != RBRACE {
+		for {
+			var key Expr
+			if p.tok == LBRACK {
+				p.next()
+				key = p.parseExpr()
+				p.expect(RBRACK)
+			} else if p.tok == IDENT {
+				ident := p.parseIdent()
+				key = &Lit{
+					ValuePos: ident.NamePos,
+					Kind:     STRING,
+					Value:    strconv.Quote(ident.Name),
+				}
+			} else {
+				key = p.parseOperand()
+			}
+			p.expect(COLON)
+			value := p.parseExpr()
+			entries = append(entries, MapLitEntry{Key: key, Value: value})
+			if p.tok != COMMA {
+				break
+			}
+			p.next()
+		}
+	}
+	rbrace := p.expect(RBRACE)
+	return &MapLit{Lbrace: lbrace, Entries: entries, Rbrace: rbrace}
+}
+
 func (p *parser) parseOperand() Expr {
 	switch p.tok {
 	case IDENT:
@@ -95,6 +153,12 @@ func (p *parser) parseOperand() Expr {
 		x := p.parseExpr()
 		rparen := p.expect(RPAREN)
 		return &ParenExpr{Lparen: lparen, X: x, Rparen: rparen}
+
+	case LBRACK:
+		return p.parseArrayLit()
+
+	case LBRACE:
+		return p.parseMapLit()
 	}
 
 	// we have an error

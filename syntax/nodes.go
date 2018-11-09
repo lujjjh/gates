@@ -22,6 +22,25 @@ type (
 		Value    string
 	}
 
+	ArrayLit struct {
+		expr
+		Lbrack   Pos
+		ElemList []Expr
+		Rbrack   Pos
+	}
+
+	MapLitEntry struct {
+		Key   Expr
+		Value Expr
+	}
+
+	MapLit struct {
+		expr
+		Lbrace  Pos
+		Entries []MapLitEntry
+		Rbrace  Pos
+	}
+
 	UnaryExpr struct {
 		expr
 		OpPos Pos

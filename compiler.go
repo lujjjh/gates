@@ -43,6 +43,21 @@ func (c *compiler) compileLit(l *syntax.Lit) {
 	}
 }
 
+func (c *compiler) compileArrayLit(e *syntax.ArrayLit) {
+	for _, elem := range e.ElemList {
+		c.compileExpr(elem)
+	}
+	c.emit(newArray(len(e.ElemList)))
+}
+
+func (c *compiler) compileMapLit(e *syntax.MapLit) {
+	for _, entry := range e.Entries {
+		c.compileExpr(entry.Key)
+		c.compileExpr(entry.Value)
+	}
+	c.emit(newMap(len(e.Entries)))
+}
+
 func (c *compiler) compileUnaryExpr(e *syntax.UnaryExpr) {
 	c.compileExpr(e.X)
 	switch e.Op {
@@ -167,6 +182,10 @@ func (c *compiler) compileExpr(e syntax.Expr) {
 		c.compileIdent(e)
 	case *syntax.Lit:
 		c.compileLit(e)
+	case *syntax.ArrayLit:
+		c.compileArrayLit(e)
+	case *syntax.MapLit:
+		c.compileMapLit(e)
 	case *syntax.UnaryExpr:
 		c.compileUnaryExpr(e)
 	case *syntax.BinaryExpr:

@@ -45,6 +45,12 @@ func (v *valueStack) Pop() Value {
 	return v.l[v.sp]
 }
 
+func (v *valueStack) PopN(n int) []Value {
+	values := v.l[v.sp-n : v.sp]
+	v.sp -= n
+	return values
+}
+
 type vm struct {
 	r       *Runtime
 	halt    bool
@@ -99,6 +105,30 @@ var pop _pop
 
 func (_pop) exec(vm *vm) {
 	vm.stack.Pop()
+	vm.pc++
+}
+
+type newArray uint
+
+func (l newArray) exec(vm *vm) {
+	values := make(Array, l)
+	copy(values, vm.stack.PopN(int(l)))
+	vm.stack.Push(values)
+	vm.pc++
+}
+
+type newMap uint
+
+func (l newMap) exec(vm *vm) {
+	m := make(Map, l)
+	ll := int(l) * 2
+	kvs := vm.stack.PopN(ll)
+	for i := 0; i < ll; i += 2 {
+		key := kvs[i]
+		value := kvs[i+1]
+		m[key.ToString()] = value
+	}
+	vm.stack.Push(m)
 	vm.pc++
 }
 

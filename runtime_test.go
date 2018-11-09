@@ -36,16 +36,16 @@ func TestRunString(t *testing.T) {
 	assertValue(t, Bool(true), mustRunString(`"abc" > "aba"`))
 	assertValue(t, String("nullhehe"), mustRunString(`null + "hehe"`))
 
-	assertValue(t, Int(42), mustRunStringWithGlobal(`a.b["c"]`, map[string]interface{}{
-		"a": getterFunc(func(r *Runtime, v Value) Value {
-			return Map(map[string]interface{}{
-				"c": 42,
+	assertValue(t, Int(42), mustRunStringWithGlobal(`a.b["c"]`, map[string]Value{
+		"a": ref(getterFunc(func(r *Runtime, v Value) Value {
+			return Map(map[string]Value{
+				"c": Int(42),
 			})
-		}),
+		})),
 	}))
 
-	assertValue(t, Int(42), mustRunStringWithGlobal(`a[1*2]`, map[string]interface{}{
-		"a": []interface{}{40, 41, 42},
+	assertValue(t, Int(42), mustRunStringWithGlobal(`a[1*2]`, map[string]Value{
+		"a": Array([]Value{Int(40), Int(41), Int(42)}),
 	}))
 
 	assertValue(t, Int(4), mustRunString(`("he" + "he").length`))
@@ -53,7 +53,7 @@ func TestRunString(t *testing.T) {
 	assertValue(t, Null, mustRunString(`"hehe"[-1]`))
 	assertValue(t, Null, mustRunString(`"hehe"[4]`))
 
-	assertValue(t, Float(3), mustRunStringWithGlobal(`add(1, 2)`, map[string]interface{}{
+	assertValue(t, Float(3), mustRunStringWithGlobal(`add(1, 2)`, map[string]Value{
 		"add": FunctionFunc(func(fc FunctionCall) Value {
 			var result float64
 			for _, arg := range fc.Args() {
@@ -62,6 +62,11 @@ func TestRunString(t *testing.T) {
 			return Float(result)
 		}),
 	}))
+
+	assertValue(t, Int(42), mustRunString(`[0, 42][1]`))
+	assertValue(t, String("bar"), mustRunString(`({foo: "bar"}).foo`))
+	assertValue(t, String("bar"), mustRunString(`({"foo": "bar"}).foo`))
+	assertValue(t, String("bar"), mustRunString(`({["foo"]: "bar", bar: "baz"}).foo`))
 }
 
 func BenchmarkRunProgram(b *testing.B) {

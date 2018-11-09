@@ -44,4 +44,10 @@ func TestParseExpr(t *testing.T) {
 	if _, err := ParseExpr(src); err != nil {
 		t.Errorf("ParseExpr(%q): got error %s", src, err)
 	}
+
+	// array and map
+	src = `[]+[1]+[1,2]+({})+({x:1})+({x:1,["y"+"z"]:2})`
+	if _, err := ParseExpr(src); err != nil {
+		t.Errorf("ParseExpr(%q): got error %s", src, err)
+	}
 }

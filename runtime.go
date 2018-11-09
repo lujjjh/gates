@@ -91,9 +91,9 @@ func (r *Runtime) ToValue(i interface{}) Value {
 		return Float(float64(i))
 	case float64:
 		return Float(i)
-	case map[string]interface{}:
+	case map[string]Value:
 		return Map(i)
-	case []interface{}:
+	case []Value:
 		return Array(i)
 	default:
 		return Ref{i}

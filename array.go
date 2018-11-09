@@ -7,7 +7,7 @@ import (
 
 var sharedRuntime Runtime
 
-type Array []interface{}
+type Array []Value
 
 func (Array) IsString() bool   { return false }
 func (Array) IsInt() bool      { return false }
@@ -44,5 +44,5 @@ func (a Array) Get(r *Runtime, key Value) Value {
 	if ii < 0 || ii >= int64(len(a)) {
 		return Null
 	}
-	return r.ToValue(a[ii])
+	return a[ii]
 }

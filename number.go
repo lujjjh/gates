@@ -20,11 +20,13 @@ func (i Int) IsInt() bool      { return true }
 func (i Int) IsFloat() bool    { return false }
 func (i Int) ToNumber() Number { return i }
 func (i Int) IsBool() bool     { return false }
+func (i Int) IsFunction() bool { return false }
 
-func (i Int) ToString() string { return strconv.FormatInt(int64(i), 10) }
-func (i Int) ToInt() int64     { return int64(i) }
-func (i Int) ToFloat() float64 { return float64(i) }
-func (i Int) ToBool() bool     { return int64(i) != 0 }
+func (i Int) ToString() string     { return strconv.FormatInt(int64(i), 10) }
+func (i Int) ToInt() int64         { return int64(i) }
+func (i Int) ToFloat() float64     { return float64(i) }
+func (i Int) ToBool() bool         { return int64(i) != 0 }
+func (i Int) ToFunction() Function { return _EmptyFunction }
 
 func (i Int) Equals(other Value) bool {
 	switch {
@@ -53,11 +55,13 @@ func (f Float) IsInt() bool      { return false }
 func (f Float) IsFloat() bool    { return true }
 func (f Float) ToNumber() Number { return f }
 func (f Float) IsBool() bool     { return false }
+func (f Float) IsFunction() bool { return false }
 
-func (f Float) ToString() string { return strconv.FormatFloat(float64(f), 'g', -1, 64) }
-func (f Float) ToInt() int64     { return int64(f) }
-func (f Float) ToFloat() float64 { return float64(f) }
-func (f Float) ToBool() bool     { return float64(f) != 0 }
+func (f Float) ToString() string     { return strconv.FormatFloat(float64(f), 'g', -1, 64) }
+func (f Float) ToInt() int64         { return int64(f) }
+func (f Float) ToFloat() float64     { return float64(f) }
+func (f Float) ToBool() bool         { return float64(f) != 0 }
+func (f Float) ToFunction() Function { return _EmptyFunction }
 
 func (f Float) Equals(other Value) bool {
 	switch {

@@ -116,6 +116,20 @@ func (p *parser) parseIndex(x Expr) Expr {
 	return &IndexExpr{X: x, Lbrack: lbrack, Index: index, Rbrack: rbrack}
 }
 
+func (p *parser) parseCall(fun Expr) *CallExpr {
+	lparen := p.expect(LPAREN)
+	var list []Expr
+	for p.tok != RPAREN && p.tok != EOF {
+		list = append(list, p.parseExpr())
+		if p.tok != RPAREN {
+			p.expect(COMMA)
+		}
+	}
+	rparen := p.expect(RPAREN)
+
+	return &CallExpr{Fun: fun, Lparen: lparen, Args: list, Rparen: rparen}
+}
+
 func (p *parser) parsePrimaryExpr() Expr {
 	x := p.parseOperand()
 
@@ -132,6 +146,8 @@ L:
 			}
 		case LBRACK:
 			x = p.parseIndex(x)
+		case LPAREN:
+			x = p.parseCall(x)
 		default:
 			break L
 		}

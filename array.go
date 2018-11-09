@@ -9,10 +9,11 @@ var sharedRuntime Runtime
 
 type Array []interface{}
 
-func (Array) IsString() bool { return false }
-func (Array) IsInt() bool    { return false }
-func (Array) IsFloat() bool  { return false }
-func (Array) IsBool() bool   { return false }
+func (Array) IsString() bool   { return false }
+func (Array) IsInt() bool      { return false }
+func (Array) IsFloat() bool    { return false }
+func (Array) IsBool() bool     { return false }
+func (Array) IsFunction() bool { return false }
 
 func (a Array) ToString() string {
 	stringSl := make([]string, 0, len(a))
@@ -22,10 +23,11 @@ func (a Array) ToString() string {
 	return strings.Join(stringSl, ",")
 }
 
-func (Array) ToInt() int64       { return 0 }
-func (Array) ToFloat() float64   { return math.NaN() }
-func (a Array) ToNumber() Number { return Float(a.ToFloat()) }
-func (Array) ToBool() bool       { return true }
+func (Array) ToInt() int64         { return 0 }
+func (Array) ToFloat() float64     { return math.NaN() }
+func (a Array) ToNumber() Number   { return Float(a.ToFloat()) }
+func (Array) ToBool() bool         { return true }
+func (Array) ToFunction() Function { return _EmptyFunction }
 
 func (a Array) Equals(other Value) bool { return Value(a) == other }
 func (a Array) SameAs(other Value) bool { return a.Equals(other) }

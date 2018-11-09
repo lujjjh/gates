@@ -38,4 +38,10 @@ func TestParseExpr(t *testing.T) {
 			t.Errorf("ParseExpr(%q): got no error", src)
 		}
 	}
+
+	// function call
+	src = `a.b["c"](b(1+1))(2,"hello"[42])`
+	if _, err := ParseExpr(src); err != nil {
+		t.Errorf("ParseExpr(%q): got error %s", src, err)
+	}
 }

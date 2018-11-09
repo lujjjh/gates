@@ -13,11 +13,24 @@ func (Ref) IsInt() bool    { return false }
 func (Ref) IsFloat() bool  { return false }
 func (Ref) IsBool() bool   { return false }
 
+func (r Ref) IsFunction() bool {
+	_, ok := r.v.(Function)
+	return ok
+}
+
 func (Ref) ToString() string     { return "[object Ref]" }
 func (Ref) ToInt() int64         { return 0 }
 func (Ref) ToFloat() float64     { return math.NaN() }
 func (ref Ref) ToNumber() Number { return Float(ref.ToFloat()) }
 func (Ref) ToBool() bool         { return true }
+
+func (r Ref) ToFunction() Function {
+	f, ok := r.v.(Function)
+	if !ok {
+		return _EmptyFunction
+	}
+	return f
+}
 
 func (ref Ref) Equals(other Value) bool {
 	if o, ok := other.(Ref); ok {

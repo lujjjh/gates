@@ -28,7 +28,7 @@ var scanTokens = [...]elt{
 	{NUMBER, "1e-100"},
 	{NUMBER, "2.71828e-1000"},
 	{STRING, `"foobar"`},
-	{STRING, `'foobar\n\0123\x0020'`},
+	{STRING, `"foobar\n\0123\x0020"`},
 
 	// Operators and delimiters
 	{ADD, "+"},

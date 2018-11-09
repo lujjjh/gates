@@ -1,6 +1,7 @@
 package gates
 
 import (
+	"fmt"
 	"math"
 	"strings"
 )
@@ -395,4 +396,26 @@ func (_gte) exec(vm *vm) {
 	x := vm.stack.Pop()
 	vm.stack.Push(Bool(!less(x, y)))
 	vm.pc++
+}
+
+type _call struct{}
+
+var call _call
+
+func (_call) exec(vm *vm) {
+	fun := vm.stack.Pop().ToFunction()
+	argc := vm.stack.Pop().ToInt()
+	args := make([]Value, argc)
+	for i := argc - 1; i >= 0; i-- {
+		args[i] = vm.stack.Pop()
+	}
+
+	fc := &functionCall{args: args}
+	switch f := fun.(type) {
+	case *nativeFunction:
+		vm.stack.Push(f.fun(fc))
+		vm.pc++
+	default:
+		panic(fmt.Errorf("unsupported function type: %T", fun))
+	}
 }

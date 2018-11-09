@@ -152,6 +152,15 @@ func (c *compiler) compileIndexExpr(e, index syntax.Expr) {
 	c.emit(get)
 }
 
+func (c *compiler) compileCallExpr(fun syntax.Expr, args []syntax.Expr) {
+	for _, arg := range args {
+		c.compileExpr(arg)
+	}
+	c.emit(load(c.program.defineLit(Int(len(args)))))
+	c.compileExpr(fun)
+	c.emit(call)
+}
+
 func (c *compiler) compileExpr(e syntax.Expr) {
 	switch e := e.(type) {
 	case *syntax.Ident:
@@ -168,6 +177,8 @@ func (c *compiler) compileExpr(e syntax.Expr) {
 		c.compileSelectorExpr(e.X, String(e.Sel.Name))
 	case *syntax.IndexExpr:
 		c.compileIndexExpr(e.X, e.Index)
+	case *syntax.CallExpr:
+		c.compileCallExpr(e.Fun, e.Args)
 	default:
 		panic(fmt.Errorf("unknown expression type: %T", e))
 	}

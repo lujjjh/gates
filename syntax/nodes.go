@@ -58,6 +58,14 @@ type (
 		Rbrack Pos
 	}
 
+	CallExpr struct {
+		expr
+		Fun    Expr
+		Lparen Pos
+		Args   []Expr
+		Rparen Pos
+	}
+
 	BadExpr struct {
 		expr
 		From, To Pos

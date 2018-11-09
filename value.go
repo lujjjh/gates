@@ -5,12 +5,14 @@ type Value interface {
 	IsInt() bool
 	IsFloat() bool
 	IsBool() bool
+	IsFunction() bool
 
 	ToString() string
 	ToInt() int64
 	ToFloat() float64
 	ToNumber() Number
 	ToBool() bool
+	ToFunction() Function
 
 	Equals(Value) bool
 

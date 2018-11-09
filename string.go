@@ -11,10 +11,11 @@ type _String struct{ s string }
 
 func String(s string) _String { return _String{s} }
 
-func (s _String) IsString() bool { return true }
-func (s _String) IsInt() bool    { return false }
-func (s _String) IsFloat() bool  { return false }
-func (s _String) IsBool() bool   { return false }
+func (s _String) IsString() bool   { return true }
+func (s _String) IsInt() bool      { return false }
+func (s _String) IsFloat() bool    { return false }
+func (s _String) IsBool() bool     { return false }
+func (s _String) IsFunction() bool { return false }
 
 func (s _String) ToString() string { return s.s }
 
@@ -40,7 +41,8 @@ func (s _String) ToNumber() Number {
 	return Float(s.ToFloat())
 }
 
-func (s _String) ToBool() bool { return s.s != "" }
+func (s _String) ToBool() bool         { return s.s != "" }
+func (s _String) ToFunction() Function { return _EmptyFunction }
 
 func (s _String) Equals(other Value) bool {
 	switch {

@@ -52,6 +52,16 @@ func TestRunString(t *testing.T) {
 	assertValue(t, String("e"), mustRunString(`"hehe"[1]`))
 	assertValue(t, Null, mustRunString(`"hehe"[-1]`))
 	assertValue(t, Null, mustRunString(`"hehe"[4]`))
+
+	assertValue(t, Float(3), mustRunStringWithGlobal(`add(1, 2)`, map[string]interface{}{
+		"add": FunctionFunc(func(fc FunctionCall) Value {
+			var result float64
+			for _, arg := range fc.Args() {
+				result += arg.ToFloat()
+			}
+			return Float(result)
+		}),
+	}))
 }
 
 func BenchmarkRunProgram(b *testing.B) {

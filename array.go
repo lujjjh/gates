@@ -30,6 +30,14 @@ func (a Array) ToNumber() Number   { return Float(a.ToFloat()) }
 func (Array) ToBool() bool         { return true }
 func (Array) ToFunction() Function { return _EmptyFunction }
 
+func (a Array) ToNative() interface{} {
+	result := make([]interface{}, 0, len(a))
+	for _, value := range a {
+		result = append(result, value.ToNative())
+	}
+	return result
+}
+
 func (a Array) Equals(other Value) bool {
 	o, ok := other.(Array)
 	if !ok {

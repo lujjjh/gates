@@ -32,6 +32,8 @@ func (r Ref) ToFunction() Function {
 	return f
 }
 
+func (r Ref) ToNative() interface{} { return r.v }
+
 func (ref Ref) Equals(other Value) bool {
 	if o, ok := other.(Ref); ok {
 		return ref.v == o.v

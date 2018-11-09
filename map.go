@@ -20,6 +20,14 @@ func (m Map) ToNumber() Number   { return Float(m.ToFloat()) }
 func (Map) ToBool() bool         { return true }
 func (Map) ToFunction() Function { return _EmptyFunction }
 
+func (m Map) ToNative() interface{} {
+	result := make(map[string]interface{}, len(m))
+	for k, v := range m {
+		result[k] = v.ToNative()
+	}
+	return result
+}
+
 func (m Map) Equals(other Value) bool {
 	o, ok := other.(Map)
 	if !ok {

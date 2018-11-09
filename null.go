@@ -16,6 +16,7 @@ func (n _Null) ToFloat() float64     { return 0 }
 func (n _Null) ToNumber() Number     { return Int(0) }
 func (n _Null) ToBool() bool         { return false }
 func (n _Null) ToFunction() Function { return _EmptyFunction }
+func (_Null) ToNative() interface{}  { return nil }
 
 func (n _Null) Equals(other Value) bool {
 	if other == Null {

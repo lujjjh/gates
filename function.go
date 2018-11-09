@@ -37,12 +37,13 @@ func (*nativeFunction) IsFloat() bool    { return false }
 func (*nativeFunction) IsBool() bool     { return false }
 func (*nativeFunction) IsFunction() bool { return true }
 
-func (*nativeFunction) ToString() string       { return "function () { [ native code ] }" }
-func (*nativeFunction) ToInt() int64           { return 0 }
-func (*nativeFunction) ToFloat() float64       { return math.NaN() }
-func (*nativeFunction) ToNumber() Number       { return Int(0) }
-func (*nativeFunction) ToBool() bool           { return true }
-func (f *nativeFunction) ToFunction() Function { return f }
+func (*nativeFunction) ToString() string        { return "function () { [ native code ] }" }
+func (*nativeFunction) ToInt() int64            { return 0 }
+func (*nativeFunction) ToFloat() float64        { return math.NaN() }
+func (*nativeFunction) ToNumber() Number        { return Int(0) }
+func (*nativeFunction) ToBool() bool            { return true }
+func (f *nativeFunction) ToFunction() Function  { return f }
+func (f *nativeFunction) ToNative() interface{} { return f.fun }
 
 func (f *nativeFunction) Equals(other Value) bool {
 	return (interface{})(f) == (interface{})(other)

@@ -20,7 +20,7 @@ func Compile(x string) (program *Program, err error) {
 
 type Runtime struct {
 	vm     *vm
-	global Ref
+	global *Global
 }
 
 func New() *Runtime {
@@ -32,14 +32,15 @@ func New() *Runtime {
 func (r *Runtime) init() {
 	r.vm = &vm{r: r}
 	r.vm.init()
+	r.global = NewGlobal()
+}
+
+func (r *Runtime) Global() *Global {
+	return r.global
 }
 
 func (r *Runtime) Reset() {
-	r.vm.init()
-}
-
-func (r *Runtime) SetGlobal(global interface{}) {
-	r.global = Ref{global}
+	r.init()
 }
 
 func (r *Runtime) RunProgram(program *Program) Value {

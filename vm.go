@@ -95,7 +95,7 @@ type _loadGlobal struct{}
 var loadGlobal _loadGlobal
 
 func (_loadGlobal) exec(vm *vm) {
-	vm.stack.Push(vm.r.global)
+	vm.stack.Push(vm.r.global.m)
 	vm.pc++
 }
 

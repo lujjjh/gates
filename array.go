@@ -49,16 +49,19 @@ func (a Array) Equals(other Value) bool {
 func (a Array) SameAs(other Value) bool { return false }
 
 func (a Array) Get(r *Runtime, key Value) Value {
-	if a == nil {
-		return Null
-	}
 	i := key.ToNumber()
-	if !i.IsInt() {
-		return Null
+	if i.IsInt() {
+		ii := i.ToInt()
+		if ii < 0 || ii >= int64(len(a)) {
+			return Null
+		}
+		return a[ii]
 	}
-	ii := i.ToInt()
-	if ii < 0 || ii >= int64(len(a)) {
-		return Null
+
+	switch key.ToString() {
+	case "length":
+		return Int(len(a))
 	}
-	return a[ii]
+
+	return Null
 }

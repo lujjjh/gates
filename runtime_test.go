@@ -4,9 +4,11 @@ import (
 	"testing"
 )
 
-func mustRunStringWithGlobal(s string, global interface{}) Value {
+func mustRunStringWithGlobal(s string, global map[string]Value) Value {
 	r := New()
-	r.SetGlobal(global)
+	for k, v := range global {
+		r.Global().Set(k, v)
+	}
 	value, err := r.RunString(s)
 	if err != nil {
 		panic(err)

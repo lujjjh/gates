@@ -2,6 +2,7 @@ package gates
 
 import (
 	"math"
+	"reflect"
 )
 
 type Map map[string]Value
@@ -19,8 +20,15 @@ func (m Map) ToNumber() Number   { return Float(m.ToFloat()) }
 func (Map) ToBool() bool         { return true }
 func (Map) ToFunction() Function { return _EmptyFunction }
 
-func (m Map) Equals(other Value) bool { return Value(m) == other }
-func (m Map) SameAs(other Value) bool { return m.Equals(other) }
+func (m Map) Equals(other Value) bool {
+	o, ok := other.(Map)
+	if !ok {
+		return false
+	}
+	return reflect.DeepEqual(m, o)
+}
+
+func (m Map) SameAs(other Value) bool { return false }
 
 func (m Map) Get(r *Runtime, key Value) Value {
 	if m == nil {

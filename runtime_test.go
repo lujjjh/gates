@@ -63,6 +63,13 @@ func TestRunString(t *testing.T) {
 		}),
 	}))
 
+	assertValue(t, Bool(true), mustRunString(`[] == []`))
+	assertValue(t, Bool(true), mustRunString(`[1] == [1]`))
+	assertValue(t, Bool(false), mustRunString(`[1] == [1, 2]`))
+	assertValue(t, Bool(true), mustRunString(`{} == {}`))
+	assertValue(t, Bool(true), mustRunString(`{ a: 1 } == { a: 1 }`))
+	assertValue(t, Bool(false), mustRunString(`{ a: 1 } == { a: 1, b: 2 }`))
+
 	assertValue(t, Int(42), mustRunString(`[0, 42][1]`))
 	assertValue(t, String("bar"), mustRunString(`({foo: "bar"}).foo`))
 	assertValue(t, String("bar"), mustRunString(`({"foo": "bar"}).foo`))

@@ -2,6 +2,7 @@ package gates
 
 import (
 	"math"
+	"reflect"
 	"strings"
 )
 
@@ -29,8 +30,15 @@ func (a Array) ToNumber() Number   { return Float(a.ToFloat()) }
 func (Array) ToBool() bool         { return true }
 func (Array) ToFunction() Function { return _EmptyFunction }
 
-func (a Array) Equals(other Value) bool { return Value(a) == other }
-func (a Array) SameAs(other Value) bool { return a.Equals(other) }
+func (a Array) Equals(other Value) bool {
+	o, ok := other.(Array)
+	if !ok {
+		return false
+	}
+	return reflect.DeepEqual(a, o)
+}
+
+func (a Array) SameAs(other Value) bool { return false }
 
 func (a Array) Get(r *Runtime, key Value) Value {
 	if a == nil {

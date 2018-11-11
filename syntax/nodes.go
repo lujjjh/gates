@@ -41,6 +41,12 @@ type (
 		Rbrace  Pos
 	}
 
+	FunctionLit struct {
+		expr
+		Function      Pos
+		ParameterList *ParameterList
+	}
+
 	UnaryExpr struct {
 		expr
 		OpPos Pos
@@ -88,5 +94,11 @@ type (
 	BadExpr struct {
 		expr
 		From, To Pos
+	}
+
+	ParameterList struct {
+		Lparen Pos
+		List   []*Ident
+		Rparen Pos
 	}
 )

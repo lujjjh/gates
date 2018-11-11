@@ -14,11 +14,12 @@ const (
 	literalBeg
 	// Identifiers and basic type literals
 	// (these tokens stand for classes of literals)
-	IDENT  // main
-	NUMBER // 123.45
-	STRING // "abc"
-	BOOL   // true
-	NULL   // null
+	IDENT    // main
+	NUMBER   // 123.45
+	STRING   // "abc"
+	BOOL     // true
+	NULL     // null
+	FUNCTION // function
 	literalEnd
 
 	operatorBeg

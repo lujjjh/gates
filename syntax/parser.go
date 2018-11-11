@@ -136,6 +136,46 @@ func (p *parser) parseMapLit() *MapLit {
 	return &MapLit{Lbrace: lbrace, Entries: entries, Rbrace: rbrace}
 }
 
+func (p *parser) parseFunction() *FunctionLit {
+	function := p.expect(FUNCTION)
+	parameterList := p.parseFunctionParameterList()
+	p.parseFunctionBody()
+
+	return &FunctionLit{
+		Function:      function,
+		ParameterList: parameterList,
+	}
+}
+
+func (p *parser) parseFunctionParameterList() *ParameterList {
+	lparen := p.expect(LPAREN)
+
+	var list []*Ident
+	if p.tok != RPAREN {
+		for {
+			ident := p.parseIdent()
+			list = append(list, ident)
+			if p.tok != COMMA {
+				break
+			}
+			p.next()
+		}
+	}
+
+	rparen := p.expect(RPAREN)
+
+	return &ParameterList{
+		Lparen: lparen,
+		List:   list,
+		Rparen: rparen,
+	}
+}
+
+func (p *parser) parseFunctionBody() {
+	_ = p.expect(LBRACE)
+	_ = p.expect(RBRACE)
+}
+
 func (p *parser) parseOperand() Expr {
 	switch p.tok {
 	case IDENT:
@@ -159,6 +199,9 @@ func (p *parser) parseOperand() Expr {
 
 	case LBRACE:
 		return p.parseMapLit()
+
+	case FUNCTION:
+		return p.parseFunction()
 	}
 
 	// we have an error

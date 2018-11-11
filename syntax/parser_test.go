@@ -50,4 +50,10 @@ func TestParseExpr(t *testing.T) {
 	if _, err := ParseExpr(src); err != nil {
 		t.Errorf("ParseExpr(%q): got error %s", src, err)
 	}
+
+	// function literal
+	src = `function () {} + function (a, b) {}`
+	if _, err := ParseExpr(src); err != nil {
+		t.Errorf("ParseExpr(%q): got error %s", src, err)
+	}
 }

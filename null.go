@@ -10,7 +10,7 @@ func (n _Null) IsFloat() bool    { return false }
 func (n _Null) IsBool() bool     { return false }
 func (n _Null) IsFunction() bool { return false }
 
-func (n _Null) ToString() string     { return "null" }
+func (n _Null) ToString() string     { return "" }
 func (n _Null) ToInt() int64         { return 0 }
 func (n _Null) ToFloat() float64     { return 0 }
 func (n _Null) ToNumber() Number     { return Int(0) }

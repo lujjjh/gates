@@ -96,6 +96,7 @@ func (c *compiler) compileFunctionLit(e *syntax.FunctionLit) {
 	for _, stmt := range e.Body.StmtList {
 		c.compileStmt(stmt)
 	}
+	c.emit(ret)
 	c.program.code[j] = newFunc(len(c.scope.names)<<24 | j + 2)
 	c.scope = c.scope.outer
 	c.program.code[j+1] = jmp1(len(c.program.code) - (j + 1))

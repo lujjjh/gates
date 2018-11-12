@@ -84,6 +84,24 @@ func TestRunString(t *testing.T) {
 	assertValue(t, Null, mustRunString(`function () {}()`))
 	assertValue(t, Null, mustRunString(`function () { return; }()`))
 	assertValue(t, Null, mustRunString(`function (a) { return a; }()`))
+
+	assertValue(t, Int(89), mustRunString(`(function (x) {
+		return function (f) {
+		  return function (n) {
+			return f(x(x)(f))(n);
+		  };
+		};
+	  })(function (x) {
+		return function (f) {
+		  return function (n) {
+			return f(x(x)(f))(n);
+		  };
+		};
+	  })(function (f) {
+		return function (n) {
+		  return (n == 0 || n == 1) && 1 || f(n - 2) + f(n - 1);
+		};
+	  })(10)`))
 }
 
 func BenchmarkRunProgram(b *testing.B) {

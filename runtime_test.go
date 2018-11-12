@@ -36,7 +36,7 @@ func TestRunString(t *testing.T) {
 	assertValue(t, Bool(true), mustRunString(`"hehe" != ("1" == true)`))
 	assertValue(t, Bool(true), mustRunString("1.1 >= 1"))
 	assertValue(t, Bool(true), mustRunString(`"abc" > "aba"`))
-	assertValue(t, String("nullhehe"), mustRunString(`null + "hehe"`))
+	assertValue(t, String("hehe"), mustRunString(`null + "hehe"`))
 
 	assertValue(t, Int(42), mustRunStringWithGlobal(`a.b["c"]`, map[string]Value{
 		"a": ref(getterFunc(func(r *Runtime, v Value) Value {

@@ -8,6 +8,14 @@ type expr struct{}
 
 func (expr) exprNode() {}
 
+type Stmt interface {
+	stmtNode()
+}
+
+type stmt struct{}
+
+func (stmt) stmtNode() {}
+
 type (
 	Ident struct {
 		expr
@@ -45,6 +53,7 @@ type (
 		expr
 		Function      Pos
 		ParameterList *ParameterList
+		Body          *FunctionBody
 	}
 
 	UnaryExpr struct {
@@ -91,8 +100,19 @@ type (
 		Rparen Pos
 	}
 
+	ReturnStmt struct {
+		stmt
+		Return Pos
+		Result Expr
+	}
+
 	BadExpr struct {
 		expr
+		From, To Pos
+	}
+
+	BadStmt struct {
+		stmt
 		From, To Pos
 	}
 
@@ -100,5 +120,11 @@ type (
 		Lparen Pos
 		List   []*Ident
 		Rparen Pos
+	}
+
+	FunctionBody struct {
+		Lbrace   Pos
+		StmtList []Stmt
+		Rbrace   Pos
 	}
 )

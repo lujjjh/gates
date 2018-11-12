@@ -139,11 +139,12 @@ func (p *parser) parseMapLit() *MapLit {
 func (p *parser) parseFunction() *FunctionLit {
 	function := p.expect(FUNCTION)
 	parameterList := p.parseFunctionParameterList()
-	p.parseFunctionBody()
+	body := p.parseFunctionBody()
 
 	return &FunctionLit{
 		Function:      function,
 		ParameterList: parameterList,
+		Body:          body,
 	}
 }
 
@@ -171,9 +172,18 @@ func (p *parser) parseFunctionParameterList() *ParameterList {
 	}
 }
 
-func (p *parser) parseFunctionBody() {
-	_ = p.expect(LBRACE)
-	_ = p.expect(RBRACE)
+func (p *parser) parseFunctionBody() *FunctionBody {
+	lbrace := p.expect(LBRACE)
+
+	stmtList := p.parseStmtList()
+
+	rbrace := p.expect(RBRACE)
+
+	return &FunctionBody{
+		Lbrace:   lbrace,
+		StmtList: stmtList,
+		Rbrace:   rbrace,
+	}
 }
 
 func (p *parser) parseOperand() Expr {
@@ -295,4 +305,37 @@ func (p *parser) parseBinaryExpr(prec1 int) Expr {
 
 func (p *parser) parseExpr() Expr {
 	return p.parseBinaryExpr(LowestPrec + 1)
+}
+
+func (p *parser) parseReturnStmt() Stmt {
+	pos := p.expect(RETURN)
+	var result Expr
+	if p.tok != SEMICOLON {
+		result = p.parseExpr()
+	}
+	p.expect(SEMICOLON)
+	return &ReturnStmt{
+		Return: pos,
+		Result: result,
+	}
+}
+
+func (p *parser) parseStmt() Stmt {
+	switch p.tok {
+	case RETURN:
+		return p.parseReturnStmt()
+	default:
+		pos := p.pos
+		p.errorExpected(pos, "statement")
+		p.next()
+		return &BadStmt{From: pos, To: p.pos}
+	}
+}
+
+func (p *parser) parseStmtList() (list []Stmt) {
+	for p.tok != RBRACE && p.tok != EOF {
+		list = append(list, p.parseStmt())
+	}
+
+	return
 }

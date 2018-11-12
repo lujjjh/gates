@@ -333,6 +333,8 @@ func (s *Scanner) Scan() (pos Pos, tok Token, lit string) {
 			tok = NULL
 		case "function":
 			tok = FUNCTION
+		case "return":
+			tok = RETURN
 		}
 	case '0' <= ch && ch <= '9':
 		tok = NUMBER

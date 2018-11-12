@@ -20,6 +20,7 @@ const (
 	BOOL     // true
 	NULL     // null
 	FUNCTION // function
+	RETURN   // return
 	literalEnd
 
 	operatorBeg

@@ -97,6 +97,7 @@ var loadNull _loadNull
 
 func (_loadNull) exec(vm *vm) {
 	vm.stack.Push(Null)
+	vm.pc++
 }
 
 type _loadGlobal struct{}
@@ -116,7 +117,7 @@ func (l loadStack) exec(vm *vm) {
 	if l < 0 {
 		argc := int(vm.stack.l[bp-3].ToInt())
 		argn := -idx - 1
-		if argn > argc {
+		if argn >= argc {
 			vm.stack.Push(Null)
 		} else {
 			vm.stack.Push(vm.stack.l[bp-3-argc+argn])

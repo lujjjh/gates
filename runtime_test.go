@@ -80,6 +80,10 @@ func TestRunString(t *testing.T) {
 	assertValue(t, Int(42), mustRunString(`function (a, b) {
 		return function (c) { return a + c; }(b + 1);
 	}(1, 40)`))
+
+	assertValue(t, Null, mustRunString(`function () {}()`))
+	assertValue(t, Null, mustRunString(`function () { return; }()`))
+	assertValue(t, Null, mustRunString(`function (a) { return a; }()`))
 }
 
 func BenchmarkRunProgram(b *testing.B) {

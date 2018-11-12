@@ -52,7 +52,7 @@ func TestParseExpr(t *testing.T) {
 	}
 
 	// function literal
-	src = `function () {} + function (a, b) {}`
+	src = `function () {} + function (a, b) { return a + b; }`
 	if _, err := ParseExpr(src); err != nil {
 		t.Errorf("ParseExpr(%q): got error %s", src, err)
 	}

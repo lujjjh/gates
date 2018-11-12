@@ -76,6 +76,10 @@ func TestRunString(t *testing.T) {
 	assertValue(t, String("bar"), mustRunString(`({foo: "bar"}).foo`))
 	assertValue(t, String("bar"), mustRunString(`({"foo": "bar"}).foo`))
 	assertValue(t, String("bar"), mustRunString(`({["foo"]: "bar", bar: "baz"}).foo`))
+
+	assertValue(t, Int(42), mustRunString(`function (a, b) {
+		return function (c) { return a + c; }(b + 1);
+	}(1, 40)`))
 }
 
 func BenchmarkRunProgram(b *testing.B) {

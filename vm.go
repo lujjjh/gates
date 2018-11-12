@@ -56,6 +56,7 @@ type vm struct {
 	halt    bool
 	pc      int
 	stack   valueStack
+	bp      int
 	program *Program
 }
 
@@ -90,12 +91,62 @@ func (index load) exec(vm *vm) {
 	vm.pc++
 }
 
+type _loadNull struct{}
+
+var loadNull _loadNull
+
+func (_loadNull) exec(vm *vm) {
+	vm.stack.Push(Null)
+}
+
 type _loadGlobal struct{}
 
 var loadGlobal _loadGlobal
 
 func (_loadGlobal) exec(vm *vm) {
 	vm.stack.Push(vm.r.global.m)
+	vm.pc++
+}
+
+type loadStack int
+
+func (l loadStack) exec(vm *vm) {
+	idx := int(l)
+	bp := vm.bp
+	if l < 0 {
+		argc := int(vm.stack.l[bp-3].ToInt())
+		argn := -idx - 1
+		if argn > argc {
+			vm.stack.Push(Null)
+		} else {
+			vm.stack.Push(vm.stack.l[bp-3-argc+argn])
+		}
+	} else {
+		vm.stack.Push(vm.stack.l[bp+idx])
+	}
+	vm.pc++
+}
+
+type storeStack uint32
+
+func (s storeStack) exec(vm *vm) {
+	idx := int(s)
+	bp := vm.bp
+	vm.stack.l[bp+idx] = vm.stack.Pop()
+	vm.pc++
+}
+
+type loadLocal uint32
+
+func (l loadLocal) exec(vm *vm) {
+	level := l >> 24
+	idx := int(l & 0x00FFFFFF)
+	bp := vm.bp
+	for level > 0 {
+		bp = int(vm.stack.l[bp-2].ToInt())
+		level--
+	}
+	vm.stack.Push(vm.stack.l[bp+idx])
 	vm.pc++
 }
 
@@ -132,6 +183,16 @@ func (l newMap) exec(vm *vm) {
 	vm.pc++
 }
 
+type newFunc uint32
+
+func (l newFunc) exec(vm *vm) {
+	pc := int(l & 0x00FFFFFF)
+	stackSize := int(l >> 24)
+	f := &literalFunction{pc: pc, stackSize: stackSize}
+	vm.stack.Push(f)
+	vm.pc++
+}
+
 type _get struct{}
 
 var get _get
@@ -141,6 +202,12 @@ func (_get) exec(vm *vm) {
 	key := vm.stack.Pop()
 	vm.stack.Push(objectGet(vm.r, base, key))
 	vm.pc++
+}
+
+type jmp1 int64
+
+func (j jmp1) exec(vm *vm) {
+	vm.pc += int(j)
 }
 
 type jeq1 int64
@@ -434,18 +501,44 @@ var call _call
 
 func (_call) exec(vm *vm) {
 	fun := vm.stack.Pop().ToFunction()
-	argc := vm.stack.Pop().ToInt()
-	args := make([]Value, argc)
-	for i := argc - 1; i >= 0; i-- {
-		args[i] = vm.stack.Pop()
-	}
-
-	fc := &functionCall{args: args}
 	switch f := fun.(type) {
 	case *nativeFunction:
+		argc := vm.stack.Pop().ToInt()
+		args := make([]Value, argc)
+		for i := argc - 1; i >= 0; i-- {
+			args[i] = vm.stack.Pop()
+		}
+		fc := &functionCall{args: args}
 		vm.stack.Push(f.fun(fc))
 		vm.pc++
+	case *literalFunction:
+		bp := vm.bp
+		pc := vm.pc
+		vm.stack.Push(Int(bp))
+		vm.stack.Push(Int(pc))
+		vm.bp = vm.stack.sp
+		for i := 0; i < f.stackSize; i++ {
+			vm.stack.Push(Null)
+		}
+		vm.pc = f.pc
 	default:
 		panic(fmt.Errorf("unsupported function type: %T", fun))
 	}
+}
+
+type _ret struct{}
+
+var ret _ret
+
+func (_ret) exec(vm *vm) {
+	pc := int(vm.stack.l[vm.bp-1].ToInt())
+	bp := int(vm.stack.l[vm.bp-2].ToInt())
+	argc := int(vm.stack.l[vm.bp-3].ToInt())
+	returnValue := vm.stack.Pop()
+	vm.stack.sp = vm.bp - 3 - argc
+	vm.stack.l = vm.stack.l[:vm.stack.sp]
+	vm.stack.Push(returnValue)
+	vm.pc = pc
+	vm.bp = bp
+	vm.pc++
 }

@@ -1,6 +1,7 @@
 package gates
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"strings"
@@ -105,13 +106,21 @@ func (vm *vm) newStash() {
 
 func (vm *vm) init() {
 	vm.stack.init()
+	vm.stash = nil
+	vm.callStack = nil
 }
 
-func (vm *vm) run() {
+func (vm *vm) run(ctx context.Context) error {
 	vm.halt = false
 	for !vm.halt {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
 		vm.program.code[vm.pc].exec(vm)
 	}
+	return nil
 }
 
 func (vm *vm) pushCtx() {

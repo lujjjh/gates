@@ -1,7 +1,9 @@
 package gates
 
 import (
+	"context"
 	"testing"
+	"time"
 )
 
 func mustRunStringWithGlobal(s string, global map[string]Value) Value {
@@ -85,23 +87,56 @@ func TestRunString(t *testing.T) {
 	assertValue(t, Null, mustRunString(`function () { return; }()`))
 	assertValue(t, Null, mustRunString(`function (a) { return a; }()`))
 
-	assertValue(t, Int(89), mustRunString(`(function (x) {
-		return function (f) {
-		  return function (n) {
-			return f(x(x)(f))(n);
-		  };
-		};
-	  })(function (x) {
-		return function (f) {
-		  return function (n) {
-			return f(x(x)(f))(n);
-		  };
-		};
-	  })(function (f) {
-		return function (n) {
-		  return (n == 0 || n == 1) && 1 || f(n - 2) + f(n - 1);
-		};
-	  })(10)`))
+	assertValue(t, Int(89), mustRunString(`
+		(function (x) {
+			return function (f) {
+				return function (n) {
+					return f(x(x)(f))(n);
+				};
+			};
+		})(function (x) {
+			return function (f) {
+				return function (n) {
+					return f(x(x)(f))(n);
+				};
+			};
+		})(function (f) {
+			return function (n) {
+				return (n == 0 || n == 1) && 1 || f(n - 2) + f(n - 1);
+			};
+		})(10)
+	`))
+}
+
+func TestRunProgramTimeout(t *testing.T) {
+	program, _ := Compile(`
+		(function (x) {
+			return function (f) {
+				return function () {
+					return f(x(x)(f))();
+				};
+			};
+		})(function (x) {
+			return function (f) {
+				return function () {
+					return f(x(x)(f))();
+				};
+			};
+		})(function (f) {
+			return function () {
+				return f();
+			};
+		})()
+	`)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+
+	r := New()
+	_, err := r.RunProgram(ctx, program)
+	if err != context.DeadlineExceeded {
+		t.Errorf("deadline exceeded expected")
+	}
 }
 
 func BenchmarkRunProgram(b *testing.B) {
@@ -110,12 +145,13 @@ func BenchmarkRunProgram(b *testing.B) {
 		panic(err)
 	}
 
+	ctx := context.Background()
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		r := New()
 		for pb.Next() {
 			r.Reset()
-			r.RunProgram(program)
+			r.RunProgram(ctx, program)
 		}
 	})
 }

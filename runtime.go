@@ -1,6 +1,8 @@
 package gates
 
 import (
+	"context"
+
 	"github.com/lujjjh/gates/syntax"
 )
 
@@ -43,11 +45,13 @@ func (r *Runtime) Reset() {
 	r.init()
 }
 
-func (r *Runtime) RunProgram(program *Program) Value {
+func (r *Runtime) RunProgram(ctx context.Context, program *Program) (Value, error) {
 	r.vm.program = program
 	r.vm.pc = 0
-	r.vm.run()
-	return r.vm.stack.Pop()
+	if err := r.vm.run(ctx); err != nil {
+		return nil, err
+	}
+	return r.vm.stack.Pop(), nil
 }
 
 func (r *Runtime) RunString(s string) (Value, error) {
@@ -55,7 +59,7 @@ func (r *Runtime) RunString(s string) (Value, error) {
 	if err != nil {
 		return nil, err
 	}
-	return r.RunProgram(program), nil
+	return r.RunProgram(context.Background(), program)
 }
 
 func (r *Runtime) ToValue(i interface{}) Value {

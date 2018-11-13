@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"strings"
 	"testing"
-	"time"
 )
 
 type panicErr struct{}
@@ -114,8 +113,8 @@ func TestRunString(t *testing.T) {
 	`))
 }
 
-func TestRunProgramTimeout(t *testing.T) {
-	program, _ := Compile(`
+func TestRunProgramStackOverflow(t *testing.T) {
+	src := `
 		(function (x) {
 			return function (f) {
 				return function () {
@@ -133,15 +132,12 @@ func TestRunProgramTimeout(t *testing.T) {
 				return f();
 			};
 		})()
-	`)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
-	defer cancel()
+	`
 
 	r := New()
-	_, err := r.RunProgram(ctx, program)
-	if err != context.DeadlineExceeded {
-		t.Errorf("deadline exceeded expected")
+	_, err := r.RunString(src)
+	if err != ErrStackOverflow {
+		t.Errorf("stack overflow expected")
 	}
 }
 

@@ -2,6 +2,7 @@ package gates
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -18,6 +19,8 @@ type stash struct {
 
 	outer *stash
 }
+
+var ErrStackOverflow = errors.New("stack overflow")
 
 func (v *valueStack) init() {
 	v.l = v.l[:0]
@@ -110,7 +113,20 @@ func (vm *vm) init() {
 	vm.callStack = nil
 }
 
-func (vm *vm) run(ctx context.Context) error {
+func (vm *vm) run(ctx context.Context) (err error) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			if rErr, ok := r.(error); ok {
+				if rErr == ErrStackOverflow {
+					err = rErr
+					return
+				}
+			}
+			panic(r)
+		}
+	}()
+
 	vm.halt = false
 	for !vm.halt {
 		select {
@@ -124,6 +140,9 @@ func (vm *vm) run(ctx context.Context) error {
 }
 
 func (vm *vm) pushCtx() {
+	if len(vm.callStack) > 1<<10 {
+		panic(ErrStackOverflow)
+	}
 	vm.callStack = append(vm.callStack, vm.stash)
 }
 

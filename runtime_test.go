@@ -2,9 +2,15 @@ package gates
 
 import (
 	"context"
+	"io/ioutil"
+	"strings"
 	"testing"
 	"time"
 )
+
+type panicErr struct{}
+
+func (*panicErr) Error() string { return "assertion failed" }
 
 func mustRunStringWithGlobal(s string, global map[string]Value) Value {
 	r := New()
@@ -136,6 +142,45 @@ func TestRunProgramTimeout(t *testing.T) {
 	_, err := r.RunProgram(ctx, program)
 	if err != context.DeadlineExceeded {
 		t.Errorf("deadline exceeded expected")
+	}
+}
+
+func TestRunFiles(t *testing.T) {
+	fileInfo, err := ioutil.ReadDir("testdata/")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	for _, f := range fileInfo {
+		if f.IsDir() {
+			continue
+		}
+		name := f.Name()
+		if !strings.HasSuffix(name, ".gates") {
+			continue
+		}
+
+		s, err := ioutil.ReadFile("testdata/" + name)
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+		r := New()
+		r.Global().InitBuiltIns()
+		r.Global().Set("assert", FunctionFunc(func(fc FunctionCall) Value {
+			args := fc.Args()
+			if len(args) < 1 {
+				panic(&panicErr{})
+			}
+			if !args[0].ToBool() {
+				panic(&panicErr{})
+			}
+			return Bool(true)
+		}))
+		_, err = r.RunString(string(s))
+		if err != nil {
+			t.Error(err)
+		}
 	}
 }
 

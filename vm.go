@@ -11,6 +11,13 @@ type valueStack struct {
 	sp int
 }
 
+type stash struct {
+	values valueStack
+	names  map[string]uint32
+
+	outer *stash
+}
+
 func (v *valueStack) init() {
 	v.l = v.l[:0]
 	v.sp = 0
@@ -51,13 +58,49 @@ func (v *valueStack) PopN(n int) []Value {
 	return values
 }
 
+func (s *stash) putByName(name string, v Value) bool {
+	if idx, ok := s.names[name]; ok {
+		s.values.expand(int(idx))
+		s.values.l[idx] = v
+		return true
+	}
+	return false
+}
+
+func (s *stash) putByIdx(idx uint32, v Value) {
+	s.values.expand(int(idx))
+	s.values.l[idx] = v
+}
+
+func (s *stash) getByName(name string) (Value, bool) {
+	if idx, ok := s.names[name]; ok {
+		return s.values.l[idx], true
+	}
+	return nil, false
+}
+
+func (s *stash) getByIdx(idx uint32) Value {
+	if int(idx) < len(s.values.l) {
+		return s.values.l[idx]
+	}
+	return Null
+}
+
 type vm struct {
-	r       *Runtime
-	halt    bool
-	pc      int
-	stack   valueStack
-	bp      int
-	program *Program
+	r         *Runtime
+	halt      bool
+	pc        int
+	stack     valueStack
+	stash     *stash
+	callStack []*stash
+	bp        int
+	program   *Program
+}
+
+func (vm *vm) newStash() {
+	vm.stash = &stash{
+		outer: vm.stash,
+	}
 }
 
 func (vm *vm) init() {
@@ -69,6 +112,16 @@ func (vm *vm) run() {
 	for !vm.halt {
 		vm.program.code[vm.pc].exec(vm)
 	}
+}
+
+func (vm *vm) pushCtx() {
+	vm.callStack = append(vm.callStack, vm.stash)
+}
+
+func (vm *vm) popCtx() {
+	l := len(vm.callStack) - 1
+	vm.stash = vm.callStack[l]
+	vm.callStack = vm.callStack[:l]
 }
 
 type instruction interface {
@@ -141,13 +194,26 @@ type loadLocal uint32
 
 func (l loadLocal) exec(vm *vm) {
 	level := l >> 24
-	idx := int(l & 0x00FFFFFF)
-	bp := vm.bp
-	for level > 0 {
-		bp = int(vm.stack.l[bp-2].ToInt())
-		level--
+	idx := uint32(l & 0x00FFFFFF)
+	stash := vm.stash
+	for ; level > 0; level-- {
+		stash = stash.outer
 	}
-	vm.stack.Push(vm.stack.l[bp+idx])
+	vm.stack.Push(stash.getByIdx(idx))
+	vm.pc++
+}
+
+type storeLocal uint32
+
+func (s storeLocal) exec(vm *vm) {
+	v := vm.stack.Pop()
+	level := s >> 24
+	idx := uint32(s & 0x00FFFFFF)
+	stash := vm.stash
+	for ; level > 0; level-- {
+		stash = stash.outer
+	}
+	stash.putByIdx(idx, v)
 	vm.pc++
 }
 
@@ -189,7 +255,11 @@ type newFunc uint32
 func (l newFunc) exec(vm *vm) {
 	pc := int(l & 0x00FFFFFF)
 	stackSize := int(l >> 24)
-	f := &literalFunction{pc: pc, stackSize: stackSize}
+	f := &literalFunction{
+		pc:        pc,
+		stackSize: stackSize,
+		stash:     vm.stash,
+	}
 	vm.stack.Push(f)
 	vm.pc++
 }
@@ -521,7 +591,10 @@ func (_call) exec(vm *vm) {
 		for i := 0; i < f.stackSize; i++ {
 			vm.stack.Push(Null)
 		}
+		vm.pushCtx()
+		vm.stash = f.stash
 		vm.pc = f.pc
+		vm.newStash()
 	default:
 		panic(fmt.Errorf("unsupported function type: %T", fun))
 	}
@@ -542,4 +615,5 @@ func (_ret) exec(vm *vm) {
 	vm.pc = pc
 	vm.bp = bp
 	vm.pc++
+	vm.popCtx()
 }

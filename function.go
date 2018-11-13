@@ -54,6 +54,7 @@ func (f *nativeFunction) SameAs(other Value) bool { return f.Equals(other) }
 type literalFunction struct {
 	pc        int
 	stackSize int
+	stash     *stash
 }
 
 func (*literalFunction) function() {}

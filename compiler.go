@@ -91,7 +91,7 @@ func (c *compiler) compileFunctionLit(e *syntax.FunctionLit) {
 	c.scope = newScope(c.scope)
 	for i, ident := range e.ParameterList.List {
 		idx := c.scope.bindName(ident.Name)
-		c.emit(loadStack(-(i + 1)), storeStack(idx))
+		c.emit(loadStack(-(i + 1)), storeLocal(idx))
 	}
 	for _, stmt := range e.Body.StmtList {
 		c.compileStmt(stmt)

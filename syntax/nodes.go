@@ -100,6 +100,14 @@ type (
 		Rparen Pos
 	}
 
+	LetStmt struct {
+		stmt
+		Let    Pos
+		Name   *Ident
+		Assign Pos
+		Value  Expr
+	}
+
 	ReturnStmt struct {
 		stmt
 		Return Pos

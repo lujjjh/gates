@@ -16,6 +16,14 @@ func (c *compiler) emit(instructions ...instruction) {
 	c.program.code = append(c.program.code, instructions...)
 }
 
+func (c *compiler) compileLetStmt(s *syntax.LetStmt) {
+	idx := c.scope.bindName(s.Name.Name)
+	if s.Value != nil {
+		c.compileExpr(s.Value)
+		c.emit(storeLocal(idx))
+	}
+}
+
 func (c *compiler) compileReturnStmt(s *syntax.ReturnStmt) {
 	if s.Result == nil {
 		c.emit(loadNull)
@@ -27,6 +35,8 @@ func (c *compiler) compileReturnStmt(s *syntax.ReturnStmt) {
 
 func (c *compiler) compileStmt(s syntax.Stmt) {
 	switch s := s.(type) {
+	case *syntax.LetStmt:
+		c.compileLetStmt(s)
 	case *syntax.ReturnStmt:
 		c.compileReturnStmt(s)
 	default:

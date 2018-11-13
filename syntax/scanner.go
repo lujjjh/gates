@@ -331,6 +331,8 @@ func (s *Scanner) Scan() (pos Pos, tok Token, lit string) {
 			tok = BOOL
 		case "null":
 			tok = NULL
+		case "let":
+			tok = LET
 		case "function":
 			tok = FUNCTION
 		case "return":
@@ -390,10 +392,7 @@ func (s *Scanner) Scan() (pos Pos, tok Token, lit string) {
 		case '>':
 			tok = s.switch3(GTR, GEQ, '>', SHR)
 		case '=':
-			if s.ch == '=' {
-				s.next()
-				tok = EQL
-			}
+			tok = s.switch2(ASSIGN, EQL)
 		case '!':
 			tok = s.switch2(NOT, NEQ)
 		case '&':

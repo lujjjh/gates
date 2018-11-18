@@ -97,7 +97,7 @@ func (c *compiler) compileMapLit(e *syntax.MapLit) {
 
 func (c *compiler) compileFunctionLit(e *syntax.FunctionLit) {
 	j := len(c.program.code)
-	c.emit(nil, nil)
+	c.emit(nil, nil, newStash)
 	c.scope = newScope(c.scope)
 	for i, ident := range e.ParameterList.List {
 		idx := c.scope.bindName(ident.Name)
@@ -108,8 +108,37 @@ func (c *compiler) compileFunctionLit(e *syntax.FunctionLit) {
 	}
 	c.emit(loadNull, ret)
 	c.program.code[j] = newFunc(len(c.scope.names)<<24 | j + 2)
+	if !c.scope.visited {
+		c.toStashlessFunction(c.program.code[j+2:])
+	}
 	c.scope = c.scope.outer
 	c.program.code[j+1] = jmp1(len(c.program.code) - (j + 1))
+}
+
+func (c *compiler) toStashlessFunction(code []instruction) {
+	code[0] = noop
+	for i, ins := range code {
+		switch ins := ins.(type) {
+		case loadLocal:
+			level := int(ins >> 24)
+			idx := uint32(ins & 0x00FFFFFF)
+			level--
+			if level < 0 {
+				code[i] = loadStack(idx)
+				continue
+			}
+			code[i] = loadLocal(uint32(level)<<24 | idx)
+		case storeLocal:
+			level := int(ins >> 24)
+			idx := uint32(ins & 0x00FFFFFF)
+			level--
+			if level < 0 {
+				code[i] = storeStack(idx)
+				continue
+			}
+			code[i] = storeLocal(uint32(level)<<24 | idx)
+		}
+	}
 }
 
 func (c *compiler) compileUnaryExpr(e *syntax.UnaryExpr) {

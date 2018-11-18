@@ -165,6 +165,14 @@ func (_halt) exec(vm *vm) {
 	vm.pc++
 }
 
+type _noop struct{}
+
+var noop _noop
+
+func (_noop) exec(vm *vm) {
+	vm.pc++
+}
+
 type load uint
 
 func (index load) exec(vm *vm) {
@@ -289,6 +297,15 @@ func (l newFunc) exec(vm *vm) {
 		stash:     vm.stash,
 	}
 	vm.stack.Push(f)
+	vm.pc++
+}
+
+type _newStash struct{}
+
+var newStash _newStash
+
+func (_newStash) exec(vm *vm) {
+	vm.newStash()
 	vm.pc++
 }
 
@@ -622,7 +639,6 @@ func (_call) exec(vm *vm) {
 		vm.pushCtx()
 		vm.stash = f.stash
 		vm.pc = f.pc
-		vm.newStash()
 	default:
 		panic(fmt.Errorf("unsupported function type: %T", fun))
 	}

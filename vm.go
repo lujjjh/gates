@@ -20,6 +20,11 @@ type stash struct {
 	outer *stash
 }
 
+type ctx struct {
+	stash  *stash
+	pc, bp int
+}
+
 var ErrStackOverflow = errors.New("stack overflow")
 
 func (v *valueStack) init() {
@@ -96,7 +101,7 @@ type vm struct {
 	pc        int
 	stack     valueStack
 	stash     *stash
-	callStack []*stash
+	callStack []ctx
 	bp        int
 	program   *Program
 }
@@ -143,12 +148,18 @@ func (vm *vm) pushCtx() {
 	if len(vm.callStack) > 1<<10 {
 		panic(ErrStackOverflow)
 	}
-	vm.callStack = append(vm.callStack, vm.stash)
+	vm.callStack = append(vm.callStack, ctx{
+		stash: vm.stash,
+		pc:    vm.pc,
+		bp:    vm.bp,
+	})
 }
 
 func (vm *vm) popCtx() {
 	l := len(vm.callStack) - 1
-	vm.stash = vm.callStack[l]
+	vm.stash = vm.callStack[l].stash
+	vm.pc = vm.callStack[l].pc
+	vm.bp = vm.callStack[l].bp
 	vm.callStack = vm.callStack[:l]
 }
 
@@ -204,12 +215,12 @@ func (l loadStack) exec(vm *vm) {
 	idx := int(l)
 	bp := vm.bp
 	if l < 0 {
-		argc := int(vm.stack.l[bp-3].ToInt())
+		argc := int(vm.stack.l[bp-1].ToInt())
 		argn := -idx - 1
 		if argn >= argc {
 			vm.stack.Push(Null)
 		} else {
-			vm.stack.Push(vm.stack.l[bp-3-argc+argn])
+			vm.stack.Push(vm.stack.l[bp-1-argc+argn])
 		}
 	} else {
 		vm.stack.Push(vm.stack.l[bp+idx])
@@ -362,7 +373,7 @@ var neg _neg
 func (_neg) exec(vm *vm) {
 	n := vm.stack.Pop().ToNumber()
 	if n.IsInt() {
-		vm.stack.Push(Int(-n.ToInt()))
+		vm.stack.Push(intToValue(-n.ToInt()))
 	} else {
 		vm.stack.Push(Float(-n.ToFloat()))
 	}
@@ -392,7 +403,7 @@ func (_add) exec(vm *vm) {
 		xStr, yStr := x.ToString(), y.ToString()
 		vm.stack.Push(String(xStr + yStr))
 	case x.IsInt() && y.IsInt():
-		vm.stack.Push(Int(x.ToInt() + y.ToInt()))
+		vm.stack.Push(intToValue(x.ToInt() + y.ToInt()))
 	default:
 		vm.stack.Push(Float(x.ToFloat() + y.ToFloat()))
 	}
@@ -410,7 +421,7 @@ func (_sub) exec(vm *vm) {
 
 	switch {
 	case x.IsInt() && y.IsInt():
-		vm.stack.Push(Int(x.ToInt() - y.ToInt()))
+		vm.stack.Push(intToValue(x.ToInt() - y.ToInt()))
 	default:
 		vm.stack.Push(Float(x.ToFloat() - y.ToFloat()))
 	}
@@ -436,7 +447,7 @@ func (_mul) exec(vm *vm) {
 			vm.pc++
 			return
 		}
-		vm.stack.Push(Int(x.ToInt() * y.ToInt()))
+		vm.stack.Push(intToValue(x.ToInt() * y.ToInt()))
 	default:
 		vm.stack.Push(Float(x.ToFloat() * y.ToFloat()))
 	}
@@ -468,7 +479,7 @@ func (_mod) exec(vm *vm) {
 	if x.IsInt() && y.IsInt() {
 		xI, yI := x.ToInt(), y.ToInt()
 		if yI != 0 {
-			vm.stack.Push(Int(xI % yI))
+			vm.stack.Push(intToValue(xI % yI))
 			vm.pc++
 			return
 		}
@@ -485,7 +496,7 @@ var and _and
 func (_and) exec(vm *vm) {
 	y := vm.stack.Pop().ToInt()
 	x := vm.stack.Pop().ToInt()
-	vm.stack.Push(Int(x & y))
+	vm.stack.Push(intToValue(x & y))
 	vm.pc++
 }
 
@@ -496,7 +507,7 @@ var or _or
 func (_or) exec(vm *vm) {
 	y := vm.stack.Pop().ToInt()
 	x := vm.stack.Pop().ToInt()
-	vm.stack.Push(Int(x | y))
+	vm.stack.Push(intToValue(x | y))
 	vm.pc++
 }
 
@@ -507,7 +518,7 @@ var xor _xor
 func (_xor) exec(vm *vm) {
 	y := vm.stack.Pop().ToInt()
 	x := vm.stack.Pop().ToInt()
-	vm.stack.Push(Int(x ^ y))
+	vm.stack.Push(intToValue(x ^ y))
 	vm.pc++
 }
 
@@ -518,7 +529,7 @@ var shl _shl
 func (_shl) exec(vm *vm) {
 	y := vm.stack.Pop().ToInt()
 	x := vm.stack.Pop().ToInt()
-	vm.stack.Push(Int(x << uint64(y)))
+	vm.stack.Push(intToValue(x << uint64(y)))
 	vm.pc++
 }
 
@@ -529,7 +540,7 @@ var shr _shr
 func (_shr) exec(vm *vm) {
 	y := vm.stack.Pop().ToInt()
 	x := vm.stack.Pop().ToInt()
-	vm.stack.Push(Int(x >> uint64(y)))
+	vm.stack.Push(intToValue(x >> uint64(y)))
 	vm.pc++
 }
 
@@ -628,15 +639,11 @@ func (_call) exec(vm *vm) {
 		vm.stack.Push(f.fun(fc))
 		vm.pc++
 	case *literalFunction:
-		bp := vm.bp
-		pc := vm.pc
-		vm.stack.Push(Int(bp))
-		vm.stack.Push(Int(pc))
+		vm.pushCtx()
 		vm.bp = vm.stack.sp
 		for i := 0; i < f.stackSize; i++ {
 			vm.stack.Push(Null)
 		}
-		vm.pushCtx()
 		vm.stash = f.stash
 		vm.pc = f.pc
 	default:
@@ -649,15 +656,11 @@ type _ret struct{}
 var ret _ret
 
 func (_ret) exec(vm *vm) {
-	pc := int(vm.stack.l[vm.bp-1].ToInt())
-	bp := int(vm.stack.l[vm.bp-2].ToInt())
-	argc := int(vm.stack.l[vm.bp-3].ToInt())
+	argc := int(vm.stack.l[vm.bp-1].ToInt())
 	returnValue := vm.stack.Pop()
-	vm.stack.sp = vm.bp - 3 - argc
+	vm.stack.sp = vm.bp - 1 - argc
 	vm.stack.l = vm.stack.l[:vm.stack.sp]
 	vm.stack.Push(returnValue)
-	vm.pc = pc
-	vm.bp = bp
-	vm.pc++
 	vm.popCtx()
+	vm.pc++
 }

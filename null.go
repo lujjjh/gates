@@ -19,10 +19,7 @@ func (n _Null) ToFunction() Function { return _EmptyFunction }
 func (_Null) ToNative() interface{}  { return nil }
 
 func (n _Null) Equals(other Value) bool {
-	if other == Null {
-		return true
-	}
-	return other.ToNumber().Equals(Int(0))
+	return other == Null
 }
 
 func (n _Null) SameAs(other Value) bool {

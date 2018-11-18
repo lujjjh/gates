@@ -1,0 +1,13 @@
+assert((function (a) {
+  let b = 2;
+  return a + b;
+})(40) == 42)
+
+&&
+
+assert((function () {
+  let fib = function (n) {
+    return (n == 0 || n == 1) && 1 || fib(n - 1) + fib(n - 2);
+  };
+  return fib(10);
+})() == 89)

@@ -9,13 +9,50 @@ import (
 
 type compiler struct {
 	program *Program
+	scope   *scope
 }
 
 func (c *compiler) emit(instructions ...instruction) {
 	c.program.code = append(c.program.code, instructions...)
 }
 
+func (c *compiler) compileLetStmt(s *syntax.LetStmt) {
+	idx := c.scope.bindName(s.Name.Name)
+	if s.Value != nil {
+		c.compileExpr(s.Value)
+		c.emit(storeLocal(idx))
+	}
+}
+
+func (c *compiler) compileReturnStmt(s *syntax.ReturnStmt) {
+	if s.Result == nil {
+		c.emit(loadNull)
+	} else {
+		c.compileExpr(s.Result)
+	}
+	c.emit(ret)
+}
+
+func (c *compiler) compileStmt(s syntax.Stmt) {
+	switch s := s.(type) {
+	case *syntax.LetStmt:
+		c.compileLetStmt(s)
+	case *syntax.ReturnStmt:
+		c.compileReturnStmt(s)
+	default:
+		panic(fmt.Errorf("unknown statement type: %T", s))
+	}
+}
+
 func (c *compiler) compileIdent(l *syntax.Ident) {
+	name := l.Name
+	if c.scope != nil {
+		idx, ok := c.scope.lookupName(name)
+		if ok {
+			c.emit(loadLocal(idx))
+			return
+		}
+	}
 	c.emit(load(c.program.defineLit(String(l.Name))), loadGlobal, get)
 }
 
@@ -56,6 +93,52 @@ func (c *compiler) compileMapLit(e *syntax.MapLit) {
 		c.compileExpr(entry.Value)
 	}
 	c.emit(newMap(len(e.Entries)))
+}
+
+func (c *compiler) compileFunctionLit(e *syntax.FunctionLit) {
+	j := len(c.program.code)
+	c.emit(nil, nil, newStash)
+	c.scope = newScope(c.scope)
+	for i, ident := range e.ParameterList.List {
+		idx := c.scope.bindName(ident.Name)
+		c.emit(loadStack(-(i + 1)), storeLocal(idx))
+	}
+	for _, stmt := range e.Body.StmtList {
+		c.compileStmt(stmt)
+	}
+	c.emit(loadNull, ret)
+	c.program.code[j] = newFunc(len(c.scope.names)<<24 | j + 2)
+	if !c.scope.visited {
+		c.toStashlessFunction(c.program.code[j+2:])
+	}
+	c.scope = c.scope.outer
+	c.program.code[j+1] = jmp1(len(c.program.code) - (j + 1))
+}
+
+func (c *compiler) toStashlessFunction(code []instruction) {
+	code[0] = noop
+	for i, ins := range code {
+		switch ins := ins.(type) {
+		case loadLocal:
+			level := int(ins >> 24)
+			idx := uint32(ins & 0x00FFFFFF)
+			level--
+			if level < 0 {
+				code[i] = loadStack(idx)
+				continue
+			}
+			code[i] = loadLocal(uint32(level)<<24 | idx)
+		case storeLocal:
+			level := int(ins >> 24)
+			idx := uint32(ins & 0x00FFFFFF)
+			level--
+			if level < 0 {
+				code[i] = storeStack(idx)
+				continue
+			}
+			code[i] = storeLocal(uint32(level)<<24 | idx)
+		}
+	}
 }
 
 func (c *compiler) compileUnaryExpr(e *syntax.UnaryExpr) {
@@ -186,6 +269,8 @@ func (c *compiler) compileExpr(e syntax.Expr) {
 		c.compileArrayLit(e)
 	case *syntax.MapLit:
 		c.compileMapLit(e)
+	case *syntax.FunctionLit:
+		c.compileFunctionLit(e)
 	case *syntax.UnaryExpr:
 		c.compileUnaryExpr(e)
 	case *syntax.BinaryExpr:

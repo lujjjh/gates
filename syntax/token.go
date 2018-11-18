@@ -14,11 +14,14 @@ const (
 	literalBeg
 	// Identifiers and basic type literals
 	// (these tokens stand for classes of literals)
-	IDENT  // main
-	NUMBER // 123.45
-	STRING // "abc"
-	BOOL   // true
-	NULL   // null
+	IDENT    // main
+	NUMBER   // 123.45
+	STRING   // "abc"
+	BOOL     // true
+	NULL     // null
+	LET      // let
+	FUNCTION // function
+	RETURN   // return
 	literalEnd
 
 	operatorBeg
@@ -37,10 +40,11 @@ const (
 	LAND // &&
 	LOR  // ||
 
-	EQL // ==
-	LSS // <
-	GTR // >
-	NOT // !
+	EQL    // ==
+	LSS    // <
+	GTR    // >
+	ASSIGN // =
+	NOT    // !
 
 	NEQ // !=
 	LEQ // <=
@@ -65,9 +69,14 @@ var tokens = [...]string{
 
 	EOF: "EOF",
 
-	IDENT:  "IDENT",
-	NUMBER: "NUMBER",
-	STRING: "STRING",
+	IDENT:    "IDENT",
+	NUMBER:   "NUMBER",
+	STRING:   "STRING",
+	BOOL:     "BOOL",
+	NULL:     "NULL",
+	LET:      "LET",
+	FUNCTION: "FUNCTION",
+	RETURN:   "RETURN",
 
 	ADD: "+",
 	SUB: "-",
@@ -84,10 +93,11 @@ var tokens = [...]string{
 	LAND: "&&",
 	LOR:  "||",
 
-	EQL: "==",
-	LSS: "<",
-	GTR: ">",
-	NOT: "!",
+	EQL:    "==",
+	LSS:    "<",
+	GTR:    ">",
+	ASSIGN: "=",
+	NOT:    "!",
 
 	NEQ: "!=",
 	LEQ: "<=",

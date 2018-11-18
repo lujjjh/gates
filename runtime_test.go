@@ -1,8 +1,15 @@
 package gates
 
 import (
+	"context"
+	"io/ioutil"
+	"strings"
 	"testing"
 )
+
+type panicErr struct{}
+
+func (*panicErr) Error() string { return "assertion failed" }
 
 func mustRunStringWithGlobal(s string, global map[string]Value) Value {
 	r := New()
@@ -36,7 +43,7 @@ func TestRunString(t *testing.T) {
 	assertValue(t, Bool(true), mustRunString(`"hehe" != ("1" == true)`))
 	assertValue(t, Bool(true), mustRunString("1.1 >= 1"))
 	assertValue(t, Bool(true), mustRunString(`"abc" > "aba"`))
-	assertValue(t, String("nullhehe"), mustRunString(`null + "hehe"`))
+	assertValue(t, String("hehe"), mustRunString(`null + "hehe"`))
 
 	assertValue(t, Int(42), mustRunStringWithGlobal(`a.b["c"]`, map[string]Value{
 		"a": ref(getterFunc(func(r *Runtime, v Value) Value {
@@ -76,6 +83,101 @@ func TestRunString(t *testing.T) {
 	assertValue(t, String("bar"), mustRunString(`({foo: "bar"}).foo`))
 	assertValue(t, String("bar"), mustRunString(`({"foo": "bar"}).foo`))
 	assertValue(t, String("bar"), mustRunString(`({["foo"]: "bar", bar: "baz"}).foo`))
+
+	assertValue(t, Int(42), mustRunString(`function (a, b) {
+		return function (c) { return a + c; }(b + 1);
+	}(1, 40)`))
+
+	assertValue(t, Null, mustRunString(`function () {}()`))
+	assertValue(t, Null, mustRunString(`function () { return; }()`))
+	assertValue(t, Null, mustRunString(`function (a) { return a; }()`))
+
+	assertValue(t, Int(89), mustRunString(`
+		(function (x) {
+			return function (f) {
+				return function (n) {
+					return f(x(x)(f))(n);
+				};
+			};
+		})(function (x) {
+			return function (f) {
+				return function (n) {
+					return f(x(x)(f))(n);
+				};
+			};
+		})(function (f) {
+			return function (n) {
+				return (n == 0 || n == 1) && 1 || f(n - 2) + f(n - 1);
+			};
+		})(10)
+	`))
+}
+
+func TestRunProgramStackOverflow(t *testing.T) {
+	src := `
+		(function (x) {
+			return function (f) {
+				return function () {
+					return f(x(x)(f))();
+				};
+			};
+		})(function (x) {
+			return function (f) {
+				return function () {
+					return f(x(x)(f))();
+				};
+			};
+		})(function (f) {
+			return function () {
+				return f();
+			};
+		})()
+	`
+
+	r := New()
+	_, err := r.RunString(src)
+	if err != ErrStackOverflow {
+		t.Errorf("stack overflow expected")
+	}
+}
+
+func TestRunFiles(t *testing.T) {
+	fileInfo, err := ioutil.ReadDir("testdata/")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	for _, f := range fileInfo {
+		if f.IsDir() {
+			continue
+		}
+		name := f.Name()
+		if !strings.HasSuffix(name, ".gates") {
+			continue
+		}
+
+		s, err := ioutil.ReadFile("testdata/" + name)
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+		r := New()
+		r.Global().InitBuiltIns()
+		r.Global().Set("assert", FunctionFunc(func(fc FunctionCall) Value {
+			args := fc.Args()
+			if len(args) < 1 {
+				panic(&panicErr{})
+			}
+			if !args[0].ToBool() {
+				panic(&panicErr{})
+			}
+			return Bool(true)
+		}))
+		_, err = r.RunString(string(s))
+		if err != nil {
+			t.Error(err)
+		}
+	}
 }
 
 func BenchmarkRunProgram(b *testing.B) {
@@ -84,12 +186,13 @@ func BenchmarkRunProgram(b *testing.B) {
 		panic(err)
 	}
 
+	ctx := context.Background()
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		r := New()
 		for pb.Next() {
 			r.Reset()
-			r.RunProgram(program)
+			r.RunProgram(ctx, program)
 		}
 	})
 }

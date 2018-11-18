@@ -136,6 +136,56 @@ func (p *parser) parseMapLit() *MapLit {
 	return &MapLit{Lbrace: lbrace, Entries: entries, Rbrace: rbrace}
 }
 
+func (p *parser) parseFunction() *FunctionLit {
+	function := p.expect(FUNCTION)
+	parameterList := p.parseFunctionParameterList()
+	body := p.parseFunctionBody()
+
+	return &FunctionLit{
+		Function:      function,
+		ParameterList: parameterList,
+		Body:          body,
+	}
+}
+
+func (p *parser) parseFunctionParameterList() *ParameterList {
+	lparen := p.expect(LPAREN)
+
+	var list []*Ident
+	if p.tok != RPAREN {
+		for {
+			ident := p.parseIdent()
+			list = append(list, ident)
+			if p.tok != COMMA {
+				break
+			}
+			p.next()
+		}
+	}
+
+	rparen := p.expect(RPAREN)
+
+	return &ParameterList{
+		Lparen: lparen,
+		List:   list,
+		Rparen: rparen,
+	}
+}
+
+func (p *parser) parseFunctionBody() *FunctionBody {
+	lbrace := p.expect(LBRACE)
+
+	stmtList := p.parseStmtList()
+
+	rbrace := p.expect(RBRACE)
+
+	return &FunctionBody{
+		Lbrace:   lbrace,
+		StmtList: stmtList,
+		Rbrace:   rbrace,
+	}
+}
+
 func (p *parser) parseOperand() Expr {
 	switch p.tok {
 	case IDENT:
@@ -159,6 +209,9 @@ func (p *parser) parseOperand() Expr {
 
 	case LBRACE:
 		return p.parseMapLit()
+
+	case FUNCTION:
+		return p.parseFunction()
 	}
 
 	// we have an error
@@ -252,4 +305,58 @@ func (p *parser) parseBinaryExpr(prec1 int) Expr {
 
 func (p *parser) parseExpr() Expr {
 	return p.parseBinaryExpr(LowestPrec + 1)
+}
+
+func (p *parser) parseLetStmt() Stmt {
+	let := p.expect(LET)
+	name := p.parseIdent()
+	var assign Pos
+	var value Expr
+	if p.tok == ASSIGN {
+		assign = p.pos
+		p.next()
+		value = p.parseExpr()
+	}
+	p.expect(SEMICOLON)
+	return &LetStmt{
+		Let:    let,
+		Name:   name,
+		Assign: assign,
+		Value:  value,
+	}
+}
+
+func (p *parser) parseReturnStmt() Stmt {
+	pos := p.expect(RETURN)
+	var result Expr
+	if p.tok != SEMICOLON {
+		result = p.parseExpr()
+	}
+	p.expect(SEMICOLON)
+	return &ReturnStmt{
+		Return: pos,
+		Result: result,
+	}
+}
+
+func (p *parser) parseStmt() Stmt {
+	switch p.tok {
+	case LET:
+		return p.parseLetStmt()
+	case RETURN:
+		return p.parseReturnStmt()
+	default:
+		pos := p.pos
+		p.errorExpected(pos, "statement")
+		p.next()
+		return &BadStmt{From: pos, To: p.pos}
+	}
+}
+
+func (p *parser) parseStmtList() (list []Stmt) {
+	for p.tok != RBRACE && p.tok != EOF {
+		list = append(list, p.parseStmt())
+	}
+
+	return
 }

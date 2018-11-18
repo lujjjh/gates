@@ -1,6 +1,7 @@
 package gates
 
 import (
+	"math"
 	"strconv"
 )
 
@@ -61,7 +62,7 @@ func (f Float) IsFunction() bool { return false }
 func (f Float) ToString() string      { return strconv.FormatFloat(float64(f), 'g', -1, 64) }
 func (f Float) ToInt() int64          { return int64(f) }
 func (f Float) ToFloat() float64      { return float64(f) }
-func (f Float) ToBool() bool          { return float64(f) != 0 }
+func (f Float) ToBool() bool          { return float64(f) != 0 && !math.IsNaN(float64(f)) }
 func (f Float) ToFunction() Function  { return _EmptyFunction }
 func (f Float) ToNative() interface{} { return f.ToFloat() }
 

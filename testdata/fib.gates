@@ -1,0 +1,17 @@
+assert((function (x) {
+  return function (f) {
+    return function (n) {
+      return f(x(x)(f))(n);
+    };
+  };
+})(function (x) {
+  return function (f) {
+    return function (n) {
+      return f(x(x)(f))(n);
+    };
+  };
+})(function (f) {
+  return function (n) {
+    return (n == 0 || n == 1) && 1 || f(n - 2) + f(n - 1);
+  };
+})(10) == 89)

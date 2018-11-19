@@ -276,9 +276,9 @@ func (_pop) exec(vm *vm) {
 type newArray uint
 
 func (l newArray) exec(vm *vm) {
-	values := make(Array, l)
+	values := make([]Value, l)
 	copy(values, vm.stack.PopN(int(l)))
-	vm.stack.Push(values)
+	vm.stack.Push(Array(values))
 	vm.pc++
 }
 
@@ -317,6 +317,18 @@ var newStash _newStash
 
 func (_newStash) exec(vm *vm) {
 	vm.newStash()
+	vm.pc++
+}
+
+type _set struct{}
+
+var set _set
+
+func (_set) exec(vm *vm) {
+	base := vm.stack.Pop()
+	key := vm.stack.Pop()
+	value := vm.stack.Pop()
+	objectSet(vm.r, base, key, value)
 	vm.pc++
 }
 
@@ -630,11 +642,8 @@ func (_call) exec(vm *vm) {
 	fun := vm.stack.Pop().ToFunction()
 	switch f := fun.(type) {
 	case *nativeFunction:
-		argc := vm.stack.Pop().ToInt()
-		args := make([]Value, argc)
-		for i := argc - 1; i >= 0; i-- {
-			args[i] = vm.stack.Pop()
-		}
+		argc := int(vm.stack.Pop().ToInt())
+		args := vm.stack.PopN(argc)
 		fc := &functionCall{args: args}
 		vm.stack.Push(f.fun(fc))
 		vm.pc++

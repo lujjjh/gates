@@ -1,0 +1,21 @@
+(function () {
+    let x = 1;
+    let y = 2;
+    let z = 0;
+    z = x + y;
+    assert(z == 3);
+
+    t = 42;
+    assert(t == 42);
+
+    let array = [0];
+    array[0] = 1;
+    assert(array[0] == 1);
+
+    let map = { a: 1 };
+    map.b = 2;
+    map["c"] = 3;
+    assert(map.a == 1);
+    assert(map.b == 2);
+    assert(map.c == 3);
+})()

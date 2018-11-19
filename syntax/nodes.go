@@ -100,6 +100,19 @@ type (
 		Rparen Pos
 	}
 
+	AssignStmt struct {
+		stmt
+		Lhs    Expr
+		TokPos Pos
+		Tok    Token
+		Rhs    Expr
+	}
+
+	ExprStmt struct {
+		stmt
+		X Expr
+	}
+
 	LetStmt struct {
 		stmt
 		Let    Pos

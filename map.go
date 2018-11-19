@@ -44,3 +44,10 @@ func (m Map) Get(r *Runtime, key Value) Value {
 	}
 	return r.ToValue(m[key.ToString()])
 }
+
+func (m Map) Set(r *Runtime, key, value Value) {
+	if m == nil {
+		return
+	}
+	m[key.ToString()] = value
+}

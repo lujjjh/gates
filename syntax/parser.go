@@ -307,6 +307,21 @@ func (p *parser) parseExpr() Expr {
 	return p.parseBinaryExpr(LowestPrec + 1)
 }
 
+func (p *parser) parseSimpleStmt() Stmt {
+	x := p.parseExpr()
+
+	switch p.tok {
+	case ASSIGN:
+		pos, tok := p.pos, p.tok
+		p.next()
+		y := p.parseExpr()
+		as := &AssignStmt{Lhs: x, TokPos: pos, Tok: tok, Rhs: y}
+		return as
+	}
+
+	return &ExprStmt{X: x}
+}
+
 func (p *parser) parseLetStmt() Stmt {
 	let := p.expect(LET)
 	name := p.parseIdent()
@@ -343,6 +358,10 @@ func (p *parser) parseStmt() Stmt {
 	switch p.tok {
 	case LET:
 		return p.parseLetStmt()
+	case IDENT:
+		s := p.parseSimpleStmt()
+		p.expect(SEMICOLON)
+		return s
 	case RETURN:
 		return p.parseReturnStmt()
 	default:

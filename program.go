@@ -1,6 +1,9 @@
 package gates
 
+import "github.com/lujjjh/gates/syntax"
+
 type Program struct {
+	src    *syntax.File
 	code   []instruction
 	values []Value
 }

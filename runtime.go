@@ -7,13 +7,27 @@ import (
 )
 
 func Compile(x string) (program *Program, err error) {
+	defer func() {
+		if x := recover(); x != nil {
+			program = nil
+			switch x1 := x.(type) {
+			case *CompilerSyntaxError:
+				err = x1
+			default:
+				panic(x)
+			}
+		}
+	}()
+
 	e, err := syntax.ParseExpr(x)
 	if err != nil {
 		return nil, err
 	}
 
 	compiler := &compiler{
-		program: &Program{},
+		program: &Program{
+			src: syntax.NewFileSet().AddFile("", -1, len(x)),
+		},
 	}
 	compiler.compile(e)
 

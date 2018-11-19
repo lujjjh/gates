@@ -35,14 +35,11 @@ func (r *Runtime) init() {
 	r.vm = &vm{r: r}
 	r.vm.init()
 	r.global = NewGlobal()
+	r.global.initBuiltIns()
 }
 
 func (r *Runtime) Global() *Global {
 	return r.global
-}
-
-func (r *Runtime) Reset() {
-	r.init()
 }
 
 func (r *Runtime) RunProgram(ctx context.Context, program *Program) (Value, error) {

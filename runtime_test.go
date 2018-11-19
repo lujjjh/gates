@@ -162,7 +162,6 @@ func TestRunFiles(t *testing.T) {
 			continue
 		}
 		r := New()
-		r.Global().InitBuiltIns()
 		r.Global().Set("assert", FunctionFunc(func(fc FunctionCall) Value {
 			args := fc.Args()
 			if len(args) < 1 {
@@ -191,7 +190,6 @@ func BenchmarkRunProgram(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		r := New()
 		for pb.Next() {
-			r.Reset()
 			r.RunProgram(ctx, program)
 		}
 	})

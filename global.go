@@ -18,7 +18,7 @@ func (g *Global) Get(name string) Value {
 	return g.m[name]
 }
 
-func (g *Global) InitBuiltIns() {
+func (g *Global) initBuiltIns() {
 	g.Set("bool", FunctionFunc(builtInBool))
 	g.Set("int", FunctionFunc(builtInInt))
 	g.Set("number", FunctionFunc(builtInNumber))

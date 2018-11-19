@@ -36,7 +36,6 @@ func run() (gates.Value, error) {
 	}
 
 	vm := gates.New()
-	vm.Global().InitBuiltIns()
 
 	ctx := context.Background()
 	if *timelimit > 0 {

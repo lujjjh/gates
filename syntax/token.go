@@ -21,6 +21,8 @@ const (
 	NULL     // null
 	LET      // let
 	FUNCTION // function
+	IF       // if
+	ELSE     // else
 	RETURN   // return
 	literalEnd
 

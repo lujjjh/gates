@@ -341,6 +341,38 @@ func (p *parser) parseLetStmt() Stmt {
 	}
 }
 
+func (p *parser) parseBodyStmt() Stmt {
+	lbrace := p.expect(LBRACE)
+	stmtList := p.parseStmtList()
+	rbrace := p.expect(RBRACE)
+	return &BodyStmt{
+		Lbrace:   lbrace,
+		StmtList: stmtList,
+		Rbrace:   rbrace,
+	}
+}
+
+func (p *parser) parseIfStmt() Stmt {
+	ifPos := p.expect(IF)
+	p.expect(LPAREN)
+	test := p.parseExpr()
+	p.expect(RPAREN)
+	consequent := p.parseStmt()
+
+	var alternate Stmt
+	if p.tok == ELSE {
+		p.next()
+		alternate = p.parseStmt()
+	}
+
+	return &IfStmt{
+		If:         ifPos,
+		Test:       test,
+		Consequent: consequent,
+		Alternate:  alternate,
+	}
+}
+
 func (p *parser) parseReturnStmt() Stmt {
 	pos := p.expect(RETURN)
 	var result Expr
@@ -356,12 +388,16 @@ func (p *parser) parseReturnStmt() Stmt {
 
 func (p *parser) parseStmt() Stmt {
 	switch p.tok {
+	case LBRACE:
+		return p.parseBodyStmt()
 	case LET:
 		return p.parseLetStmt()
 	case IDENT:
 		s := p.parseSimpleStmt()
 		p.expect(SEMICOLON)
 		return s
+	case IF:
+		return p.parseIfStmt()
 	case RETURN:
 		return p.parseReturnStmt()
 	default:

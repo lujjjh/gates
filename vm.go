@@ -320,6 +320,15 @@ func (_newStash) exec(vm *vm) {
 	vm.pc++
 }
 
+type _popStash struct{}
+
+var popStash _popStash
+
+func (_popStash) exec(vm *vm) {
+	vm.stash = vm.stash.outer
+	vm.pc++
+}
+
 type _set struct{}
 
 var set _set
@@ -347,6 +356,16 @@ type jmp1 int64
 
 func (j jmp1) exec(vm *vm) {
 	vm.pc += int(j)
+}
+
+type jne int32
+
+func (j jne) exec(vm *vm) {
+	if !vm.stack.Pop().ToBool() {
+		vm.pc += int(j)
+	} else {
+		vm.pc++
+	}
 }
 
 type jeq1 int64

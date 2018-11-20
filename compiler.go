@@ -43,6 +43,14 @@ func (c *compiler) throwSyntaxError(pos syntax.Pos, format string, args ...inter
 	})
 }
 
+func (c *compiler) openScope() {
+	c.scope = newScope(c.scope)
+}
+
+func (c *compiler) closeScope() {
+	c.scope = c.scope.outer
+}
+
 func (c *compiler) compileAssignStmt(s *syntax.AssignStmt) {
 	switch s.Tok {
 	case syntax.ASSIGN:
@@ -61,6 +69,22 @@ func (c *compiler) compileLetStmt(s *syntax.LetStmt) {
 	}
 }
 
+func (c *compiler) compileIfStmt(s *syntax.IfStmt) {
+	c.compileExpr(s.Test).emitGetter()
+	jmp := len(c.program.code)
+	c.emit(nil)
+	c.compileStmt(s.Consequent)
+	if s.Alternate != nil {
+		jmp2 := len(c.program.code)
+		c.emit(nil)
+		c.program.code[jmp] = jne(len(c.program.code) - jmp)
+		c.compileStmt(s.Alternate)
+		c.program.code[jmp2] = jmp1(len(c.program.code) - jmp2)
+		return
+	}
+	c.program.code[jmp] = jne(len(c.program.code) - jmp)
+}
+
 func (c *compiler) compileReturnStmt(s *syntax.ReturnStmt) {
 	if s.Result == nil {
 		c.emit(loadNull)
@@ -75,6 +99,16 @@ func (c *compiler) compileStmt(s syntax.Stmt) {
 	case *syntax.ExprStmt:
 		c.compileExpr(s.X).emitGetter()
 		c.emit(pop)
+	case *syntax.BodyStmt:
+		c.openScope()
+		c.emit(newStash)
+		for _, stmt := range s.StmtList {
+			c.compileStmt(stmt)
+		}
+		c.emit(popStash)
+		c.closeScope()
+	case *syntax.IfStmt:
+		c.compileIfStmt(s)
 	case *syntax.AssignStmt:
 		c.compileAssignStmt(s)
 	case *syntax.LetStmt:

@@ -113,12 +113,27 @@ type (
 		X Expr
 	}
 
+	BodyStmt struct {
+		stmt
+		Lbrace   Pos
+		StmtList []Stmt
+		Rbrace   Pos
+	}
+
 	LetStmt struct {
 		stmt
 		Let    Pos
 		Name   *Ident
 		Assign Pos
 		Value  Expr
+	}
+
+	IfStmt struct {
+		stmt
+		If         Pos
+		Test       Expr
+		Consequent Stmt
+		Alternate  Stmt
 	}
 
 	ReturnStmt struct {

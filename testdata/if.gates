@@ -1,0 +1,27 @@
+(function () {
+  let counter = 0;
+
+  if (false) assert(false);
+  if (false) {
+    assert(false);
+  }
+
+  if (true) {
+    counter = counter + 1;
+  } else {
+    assert(false);
+  }
+
+  if (false) {
+  } else {
+    counter = counter + 1;
+  }
+
+  assert(counter == 2);
+
+  if (count == 0) {
+    assert(false);
+  } else if (count == 1) {
+    assert(false);
+  }
+})()

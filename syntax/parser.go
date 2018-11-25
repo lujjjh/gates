@@ -322,22 +322,45 @@ func (p *parser) parseSimpleStmt() Stmt {
 	return &ExprStmt{X: x}
 }
 
+func (p *parser) parseVarDecl() Expr {
+	namePos := p.pos
+	name := p.parseIdent().Name
+	var initializer Expr
+
+	if p.tok == ASSIGN {
+		p.next()
+		initializer = p.parseExpr()
+	}
+
+	return &VarDeclExpr{
+		Name:        name,
+		NamePos:     namePos,
+		Initializer: initializer,
+	}
+}
+
+func (p *parser) parseVarDeclList() []Expr {
+	var list []Expr
+
+	for {
+		list = append(list, p.parseVarDecl())
+		if p.tok != COMMA {
+			break
+		}
+		p.next()
+	}
+
+	return list
+}
+
 func (p *parser) parseLetStmt() Stmt {
 	let := p.expect(LET)
-	name := p.parseIdent()
-	var assign Pos
-	var value Expr
-	if p.tok == ASSIGN {
-		assign = p.pos
-		p.next()
-		value = p.parseExpr()
-	}
+
+	list := p.parseVarDeclList()
 	p.expect(SEMICOLON)
 	return &LetStmt{
-		Let:    let,
-		Name:   name,
-		Assign: assign,
-		Value:  value,
+		Let:  let,
+		List: list,
 	}
 }
 
@@ -373,6 +396,35 @@ func (p *parser) parseIfStmt() Stmt {
 	}
 }
 
+func (p *parser) parseForStmt() Stmt {
+	forPos := p.expect(FOR)
+	p.expect(LPAREN)
+	var initializer Stmt
+	if p.tok == LET {
+		initializer = p.parseLetStmt()
+	}
+	p.expect(SEMICOLON)
+	var test Expr
+	if p.tok != SEMICOLON && p.tok != EOF {
+		test = p.parseExpr()
+	}
+	var update Stmt
+	if p.tok != RPAREN && p.tok != EOF {
+		update = p.parseSimpleStmt()
+	}
+	p.expect(RPAREN)
+
+	body := p.parseStmt()
+
+	return &ForStmt{
+		For:         forPos,
+		Initializer: initializer,
+		Test:        test,
+		Update:      update,
+		Body:        body,
+	}
+}
+
 func (p *parser) parseReturnStmt() Stmt {
 	pos := p.expect(RETURN)
 	var result Expr
@@ -398,6 +450,8 @@ func (p *parser) parseStmt() Stmt {
 		return s
 	case IF:
 		return p.parseIfStmt()
+	case FOR:
+		return p.parseForStmt()
 	case RETURN:
 		return p.parseReturnStmt()
 	default:

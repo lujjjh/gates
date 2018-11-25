@@ -82,6 +82,12 @@ type compiledCallExpr struct {
 	args []compiledExpr
 }
 
+type compiledVarDeclExpr struct {
+	baseCompiledExpr
+	name        string
+	initializer compiledExpr
+}
+
 func (e *baseCompiledExpr) init(c *compiler, pos syntax.Pos) {
 	e.c = c
 	e.pos = pos
@@ -257,4 +263,12 @@ func (e *compiledCallExpr) emitGetter() {
 	e.c.emit(load(e.c.program.defineLit(Int(len(e.args)))))
 	e.fun.emitGetter()
 	e.c.emit(call)
+}
+
+func (e *compiledVarDeclExpr) emitGetter() {
+	idx := e.c.scope.bindName(e.name)
+	if e.initializer != nil {
+		e.initializer.emitGetter()
+		e.c.emit(storeLocal(idx))
+	}
 }

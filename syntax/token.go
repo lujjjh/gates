@@ -23,6 +23,7 @@ const (
 	FUNCTION // function
 	IF       // if
 	ELSE     // else
+	FOR      // for
 	RETURN   // return
 	literalEnd
 
@@ -78,6 +79,9 @@ var tokens = [...]string{
 	NULL:     "NULL",
 	LET:      "LET",
 	FUNCTION: "FUNCTION",
+	IF:       "IF",
+	ELSE:     "ELSE",
+	FOR:      "FOR",
 	RETURN:   "RETURN",
 
 	ADD: "+",

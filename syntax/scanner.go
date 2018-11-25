@@ -339,6 +339,8 @@ func (s *Scanner) Scan() (pos Pos, tok Token, lit string) {
 			tok = IF
 		case "else":
 			tok = ELSE
+		case "for":
+			tok = FOR
 		case "return":
 			tok = RETURN
 		}

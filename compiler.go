@@ -62,10 +62,8 @@ func (c *compiler) compileAssignStmt(s *syntax.AssignStmt) {
 }
 
 func (c *compiler) compileLetStmt(s *syntax.LetStmt) {
-	idx := c.scope.bindName(s.Name.Name)
-	if s.Value != nil {
-		c.compileExpr(s.Value).emitGetter()
-		c.emit(storeLocal(idx))
+	for _, expr := range s.List {
+		c.compileExpr(expr).emitGetter()
 	}
 }
 
@@ -285,6 +283,19 @@ func (c *compiler) compileCallExpr(e *syntax.CallExpr) compiledExpr {
 	return r
 }
 
+func (c *compiler) compileVarDeclExpr(e *syntax.VarDeclExpr) compiledExpr {
+	var initializer compiledExpr
+	if e.Initializer != nil {
+		initializer = c.compileExpr(e.Initializer)
+	}
+	r := &compiledVarDeclExpr{
+		name:        e.Name,
+		initializer: initializer,
+	}
+	r.init(c, e.NamePos)
+	return r
+}
+
 func (c *compiler) compileExpr(e syntax.Expr) compiledExpr {
 	switch e := e.(type) {
 	case *syntax.Ident:
@@ -309,6 +320,8 @@ func (c *compiler) compileExpr(e syntax.Expr) compiledExpr {
 		return c.compileIndexExpr(e.X, e.Index, e.Lbrack)
 	case *syntax.CallExpr:
 		return c.compileCallExpr(e)
+	case *syntax.VarDeclExpr:
+		return c.compileVarDeclExpr(e)
 	default:
 		panic(fmt.Errorf("unknown expression type: %T", e))
 	}

@@ -100,6 +100,13 @@ type (
 		Rparen Pos
 	}
 
+	VarDeclExpr struct {
+		expr
+		Name        string
+		NamePos     Pos
+		Initializer Expr
+	}
+
 	AssignStmt struct {
 		stmt
 		Lhs    Expr
@@ -122,10 +129,8 @@ type (
 
 	LetStmt struct {
 		stmt
-		Let    Pos
-		Name   *Ident
-		Assign Pos
-		Value  Expr
+		Let  Pos
+		List []Expr
 	}
 
 	IfStmt struct {
@@ -134,6 +139,15 @@ type (
 		Test       Expr
 		Consequent Stmt
 		Alternate  Stmt
+	}
+
+	ForStmt struct {
+		stmt
+		For         Pos
+		Initializer Stmt
+		Test        Expr
+		Update      Stmt
+		Body        Stmt
 	}
 
 	ReturnStmt struct {

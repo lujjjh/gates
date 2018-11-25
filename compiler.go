@@ -83,6 +83,37 @@ func (c *compiler) compileIfStmt(s *syntax.IfStmt) {
 	c.program.code[jmp] = jne(len(c.program.code) - jmp)
 }
 
+func (c *compiler) compileForStmt(s *syntax.ForStmt) {
+	if s.Initializer != nil {
+		c.openScope()
+		c.emit(newStash)
+		defer func() {
+			c.emit(popStash)
+			c.closeScope()
+		}()
+
+		c.compileStmt(s.Initializer)
+	}
+
+	start := len(c.program.code)
+	var j int
+	if s.Test != nil {
+		c.compileExpr(s.Test).emitGetter()
+		j = len(c.program.code)
+		c.emit(nil)
+	}
+
+	c.compileStmt(s.Body)
+	if s.Update != nil {
+		c.compileStmt(s.Update)
+	}
+	c.emit(jmp1(start - len(c.program.code)))
+
+	if s.Test != nil {
+		c.program.code[j] = jne(len(c.program.code) - j)
+	}
+}
+
 func (c *compiler) compileReturnStmt(s *syntax.ReturnStmt) {
 	if s.Result == nil {
 		c.emit(loadNull)
@@ -111,6 +142,8 @@ func (c *compiler) compileStmt(s syntax.Stmt) {
 		c.compileAssignStmt(s)
 	case *syntax.LetStmt:
 		c.compileLetStmt(s)
+	case *syntax.ForStmt:
+		c.compileForStmt(s)
 	case *syntax.ReturnStmt:
 		c.compileReturnStmt(s)
 	default:

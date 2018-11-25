@@ -1,0 +1,33 @@
+(function () {
+
+  {
+    let sum = 0;
+    let i = 1;
+    for (; i <= 100; ) {
+        sum  = sum + i;
+        i = i + 1;
+    }
+    assert(i == 101);
+    assert(sum == 5050);
+  }
+
+  {
+    let sum = 0;
+    let i = 1;
+    for (; i <= 100; i = i + 1) {
+        sum  = sum + i;
+    }
+    assert(i == 101);
+    assert(sum == 5050);
+  }
+
+  {
+    let sum = 0;
+    for (let i = 1; i <= 100; i = i + 1) {
+        sum  = sum + i;
+    }
+    assert(i == null);
+    assert(sum == 5050);
+  }
+
+})()

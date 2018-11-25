@@ -402,12 +402,14 @@ func (p *parser) parseForStmt() Stmt {
 	var initializer Stmt
 	if p.tok == LET {
 		initializer = p.parseLetStmt()
+	} else {
+		p.expect(SEMICOLON)
 	}
-	p.expect(SEMICOLON)
 	var test Expr
 	if p.tok != SEMICOLON && p.tok != EOF {
 		test = p.parseExpr()
 	}
+	p.expect(SEMICOLON)
 	var update Stmt
 	if p.tok != RPAREN && p.tok != EOF {
 		update = p.parseSimpleStmt()

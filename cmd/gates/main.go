@@ -11,7 +11,7 @@ import (
 	"runtime/pprof"
 	"time"
 
-	"github.com/lujjjh/gates"
+	"github.com/gates/gates"
 )
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")

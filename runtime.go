@@ -3,7 +3,7 @@ package gates
 import (
 	"context"
 
-	"github.com/lujjjh/gates/syntax"
+	"github.com/gates/gates/syntax"
 )
 
 func Compile(x string) (program *Program, err error) {

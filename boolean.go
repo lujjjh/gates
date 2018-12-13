@@ -1,5 +1,10 @@
 package gates
 
+var (
+	True  = Bool(true)
+	False = Bool(false)
+)
+
 type Bool bool
 
 func (b Bool) IsString() bool   { return false }

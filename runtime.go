@@ -50,6 +50,8 @@ func (r *Runtime) init() {
 	r.vm.init()
 	r.global = NewGlobal()
 	r.global.initBuiltIns()
+
+	initPackageStrings(r)
 }
 
 func (r *Runtime) Global() *Global {

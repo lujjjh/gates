@@ -1,0 +1,9 @@
+(function () {
+  let NaN = 0 / 0;
+
+  let assertf = function (v) { assert(!v); };
+
+  assert(NaN != NaN);
+  assertf(NaN <= NaN);
+  assertf(NaN >= NaN);
+})()

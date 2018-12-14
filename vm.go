@@ -597,16 +597,22 @@ func (_neq) exec(vm *vm) {
 	vm.pc++
 }
 
-func less(x, y Value) bool {
+func less(x, y Value) Value {
 	switch {
 	case x.IsString() && y.IsString():
 		xs, ys := x.ToString(), y.ToString()
-		return strings.Compare(xs, ys) == -1
+		return Bool(strings.Compare(xs, ys) == -1)
 	case x.IsInt() && y.IsInt():
-		return x.ToInt() < y.ToInt()
-	default:
-		return x.ToFloat() < y.ToFloat()
+		return Bool(x.ToInt() < y.ToInt())
 	}
+
+	nx := x.ToFloat()
+	ny := y.ToFloat()
+
+	if math.IsNaN(nx) || math.IsNaN(ny) {
+		return Null
+	}
+	return Bool(nx < ny)
 }
 
 type _lt struct{}
@@ -616,7 +622,12 @@ var lt _lt
 func (_lt) exec(vm *vm) {
 	y := vm.stack.Pop()
 	x := vm.stack.Pop()
-	vm.stack.Push(Bool(less(x, y)))
+	ret := less(x, y)
+	if ret == Null {
+		vm.stack.Push(Bool(false))
+	} else {
+		vm.stack.Push(ret)
+	}
 	vm.pc++
 }
 
@@ -627,7 +638,12 @@ var lte _lte
 func (_lte) exec(vm *vm) {
 	y := vm.stack.Pop()
 	x := vm.stack.Pop()
-	vm.stack.Push(Bool(!less(y, x)))
+	ret := less(y, x)
+	if ret == Null || ret == Bool(true) {
+		vm.stack.Push(Bool(false))
+	} else {
+		vm.stack.Push(Bool(true))
+	}
 	vm.pc++
 }
 
@@ -638,7 +654,12 @@ var gt _gt
 func (_gt) exec(vm *vm) {
 	y := vm.stack.Pop()
 	x := vm.stack.Pop()
-	vm.stack.Push(Bool(less(y, x)))
+	ret := less(y, x)
+	if ret == Null {
+		vm.stack.Push(Bool(false))
+	} else {
+		vm.stack.Push(ret)
+	}
 	vm.pc++
 }
 
@@ -649,7 +670,12 @@ var gte _gte
 func (_gte) exec(vm *vm) {
 	y := vm.stack.Pop()
 	x := vm.stack.Pop()
-	vm.stack.Push(Bool(!less(x, y)))
+	ret := less(x, y)
+	if ret == Null || ret == Bool(true) {
+		vm.stack.Push(Bool(false))
+	} else {
+		vm.stack.Push(Bool(true))
+	}
 	vm.pc++
 }
 

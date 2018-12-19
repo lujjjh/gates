@@ -17,7 +17,6 @@ func (s packageStrings) export() Map {
 		"trim":       s.trim,
 		"trim_left":  s.trimLeft,
 		"trim_right": s.trimRight,
-		"trim_space": s.trimSpace,
 		"split":      s.split,
 		"join":       s.join,
 	}
@@ -70,7 +69,7 @@ func (s packageStrings) trim(fc FunctionCall) Value {
 	if len(args) == 0 {
 		return Null
 	} else if len(args) == 1 {
-		return args[0]
+		return String(strings.TrimSpace(args[0].ToString()))
 	}
 	return String(strings.Trim(args[0].ToString(), args[1].ToString()))
 }
@@ -93,14 +92,6 @@ func (s packageStrings) trimRight(fc FunctionCall) Value {
 		return args[0]
 	}
 	return String(strings.TrimRight(args[0].ToString(), args[1].ToString()))
-}
-
-func (s packageStrings) trimSpace(fc FunctionCall) Value {
-	args := fc.Args()
-	if len(args) == 0 {
-		return Null
-	}
-	return String(strings.TrimSpace(args[0].ToString()))
 }
 
 func (s packageStrings) split(fc FunctionCall) Value {

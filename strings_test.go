@@ -135,6 +135,18 @@ func TestTrim(t *testing.T) {
 	v, err = r.RunString(`strings.trim("foo__", "foo")`)
 	assertNil(err)
 	assertEqual(v.ToString(), "__")
+
+	v, err = r.RunString(`strings.trim("  foo__bar  ")`)
+	assertNil(err)
+	assertEqual(v.ToString(), "foo__bar")
+
+	v, err = r.RunString(`strings.trim("foo  bar")`)
+	assertNil(err)
+	assertEqual(v.ToString(), "foo  bar")
+
+	v, err = r.RunString(`strings.trim("  foo  bar   ")`)
+	assertNil(err)
+	assertEqual(v.ToString(), "foo  bar")
 }
 
 func TestTrimLeft(t *testing.T) {
@@ -171,20 +183,6 @@ func TestTrimRight(t *testing.T) {
 	v, err = r.RunString(`strings.trim_right("foo__", "foo")`)
 	assertNil(err)
 	assertEqual(v.ToString(), "foo__")
-}
-
-func TestTrimSpace(t *testing.T) {
-	v, err := r.RunString(`strings.trim_space("  foo__bar  ")`)
-	assertNil(err)
-	assertEqual(v.ToString(), "foo__bar")
-
-	v, err = r.RunString(`strings.trim_space("foo  bar")`)
-	assertNil(err)
-	assertEqual(v.ToString(), "foo  bar")
-
-	v, err = r.RunString(`strings.trim_space("  foo  bar   ")`)
-	assertNil(err)
-	assertEqual(v.ToString(), "foo  bar")
 }
 
 func TestSplit(t *testing.T) {

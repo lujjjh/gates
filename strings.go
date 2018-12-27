@@ -1,6 +1,7 @@
 package gates
 
 import (
+	"regexp"
 	"strings"
 )
 
@@ -19,6 +20,7 @@ func (s packageStrings) export() Map {
 		"trim_right": s.trimRight,
 		"split":      s.split,
 		"join":       s.join,
+		"match":      s.match,
 	}
 	m := make(Map, len(ps))
 	for name, fun := range ps {
@@ -134,4 +136,62 @@ func (s packageStrings) join(fc FunctionCall) Value {
 	}
 
 	return String(strings.Join(a, sep))
+}
+
+type matcher struct {
+	result     []string
+	nameResult map[string]string
+}
+
+func (m matcher) group(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) == 0 {
+		return Null
+	}
+	if args[0].IsInt() {
+		index := int(args[0].ToInt())
+		if index >= len(m.result) || index < 0 {
+			return Null
+		}
+		return String(m.result[index])
+	}
+	res, exist := m.nameResult[args[0].ToString()]
+	if !exist {
+		return Null
+	}
+	return String(res)
+}
+
+func newMatcher(result []string, expNames []string) matcher {
+	m := matcher{
+		result:     result,
+		nameResult: make(map[string]string),
+	}
+	if len(expNames) > 0 {
+		for i, name := range expNames {
+			if i != 0 && name != "" {
+				m.nameResult[name] = result[i]
+			}
+		}
+	}
+	return m
+}
+
+func (s packageStrings) match(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) < 2 {
+		return Null
+	}
+
+	pattern, err := regexp.Compile(args[0].ToString())
+	if err != nil {
+		return Null
+	}
+	str := args[1].ToString()
+	result := pattern.FindStringSubmatch(str)
+	if len(result) == 0 {
+		return Null
+	}
+	m := newMatcher(result, pattern.SubexpNames())
+	return Map{"group": FunctionFunc(m.group)}
 }

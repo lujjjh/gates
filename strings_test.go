@@ -197,3 +197,37 @@ func TestJoin(t *testing.T) {
 	assertNil(err)
 	assertEqual(v.ToString(), "1|2|true|1.1")
 }
+
+func TestMatch(t *testing.T) {
+	v, err := r.RunString(`strings.match("(?P<first_name>\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group(1) == "Malcolm"`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+
+	v, err = r.RunString(`strings.match("(?P<first_name>\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group("first_name") == "Malcolm"`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+
+	v, err = r.RunString(`strings.match("(\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group("first_name") == null`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+
+	v, err = r.RunString(`strings.match("(\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group(1) == "Malcolm"`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+
+	v, err = r.RunString(`strings.match("(\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group("last_name") == "Reynolds"`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+
+	v, err = r.RunString(`strings.match("(\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group(-1) == null`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+
+	v, err = r.RunString(`strings.match("(\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group(10000) == null`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+
+	v, err = r.RunString(`strings.match("(?i)test", "Test") != null`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+}

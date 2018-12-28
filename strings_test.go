@@ -2,6 +2,7 @@ package gates_test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/gates/gates"
@@ -196,4 +197,115 @@ func TestJoin(t *testing.T) {
 	v, err := r.RunString(`strings.join([1, "2", true, 1.1], "|")`)
 	assertNil(err)
 	assertEqual(v.ToString(), "1|2|true|1.1")
+}
+
+func TestMatch(t *testing.T) {
+	v, err := r.RunString(`strings.match("(?P<first_name>\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group(1) == "Malcolm"`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+
+	v, err = r.RunString(`strings.match("(?P<first_name>\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group("first_name") == "Malcolm"`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+
+	v, err = r.RunString(`strings.match("(\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group("first_name") == null`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+
+	v, err = r.RunString(`strings.match("(\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group(1) == "Malcolm"`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+
+	v, err = r.RunString(`strings.match("(\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group("last_name") == "Reynolds"`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+
+	v, err = r.RunString(`strings.match("(\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group(-1) == null`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+
+	v, err = r.RunString(`strings.match("(\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group(10000) == null`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+
+	v, err = r.RunString(`strings.match("(?i)test", "Test") != null`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+}
+
+func TestFindALl(t *testing.T) {
+	v, err := r.RunString(`
+	(function() {
+		let results = strings.find_all("(?i)(foo)", "foo\nfOo\nFOO");
+		return results[0] == "foo" && results[1] == "fOo" && results[2] == "FOO";
+	})()
+	`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+}
+
+func TestContains(t *testing.T) {
+	v, err := r.RunString(`strings.contains("foobarfoo", "foo")`)
+	assertNil(err)
+	assertTrue(v == gates.True)
+
+	v, err = r.RunString(`strings.contains("foobarfoo", "abc")`)
+	assertNil(err)
+	assertTrue(v == gates.False)
+
+	v, err = r.RunString(`strings.contains_any("foobarfoobar", "barfoo")`)
+	assertNil(err)
+	assertTrue(v == gates.True)
+}
+
+func TestIndex(t *testing.T) {
+	v, err := r.RunString(`strings.index("foobarfoo", "foo")`)
+	assertNil(err)
+	assertTrue(v.ToInt() == 0)
+
+	v, err = r.RunString(`strings.index("foobarfoo", "bar")`)
+	assertNil(err)
+	assertTrue(v.ToInt() == 3)
+
+	v, err = r.RunString(`strings.index("foobarfoo", "rba")`)
+	assertNil(err)
+	assertTrue(v.ToInt() == -1)
+
+	v, err = r.RunString(`strings.index_any("barfoo", "aroo")`)
+	assertNil(err)
+	assertTrue(v.ToInt() == 1)
+
+	v, err = r.RunString(`strings.index_any("barfoo", "ttoo")`)
+	assertNil(err)
+	assertTrue(v.ToInt() == 4)
+
+	v, err = r.RunString(`strings.index_any("barfoo", "ttt")`)
+	assertNil(err)
+	assertTrue(v.ToInt() == -1)
+
+	v, err = r.RunString(`strings.last_index("foobarfoo", "foo")`)
+	assertNil(err)
+	assertTrue(v.ToInt() == 6)
+
+	v, err = r.RunString(`strings.last_index_any("foobarfoo", "foobb")`)
+	assertNil(err)
+	assertTrue(v.ToInt() == 8)
+
+	v, err = r.RunString(`strings.last_index_any("foobarfoo", "tttt")`)
+	assertNil(err)
+	assertTrue(v.ToInt() == -1)
+}
+
+func TestRepeat(t *testing.T) {
+	v, err := r.RunString(`strings.repeat("foo", 5)`)
+	assertNil(err)
+	assertEqual(strings.Repeat("foo", 5), v.ToString())
+
+	v, err = r.RunString(`strings.repeat("foo", "a")`)
+	assertNil(err)
+	assertEqual(strings.Repeat("foo", 0), v.ToString())
+
+	v, err = r.RunString(`strings.repeat("foo", -1) == null`)
+	assertNil(err)
+	assertTrue(v.ToBool())
 }

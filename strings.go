@@ -11,17 +11,24 @@ type packageStrings struct {
 
 func (s packageStrings) export() Map {
 	ps := map[string]func(FunctionCall) Value{
-		"has_prefix": s.hasPrefix,
-		"has_suffix": s.hasSuffix,
-		"to_lower":   s.toLower,
-		"to_upper":   s.toUpper,
-		"trim":       s.trim,
-		"trim_left":  s.trimLeft,
-		"trim_right": s.trimRight,
-		"split":      s.split,
-		"join":       s.join,
-		"match":      s.match,
-		"find_all":   s.findAll,
+		"has_prefix":     s.hasPrefix,
+		"has_suffix":     s.hasSuffix,
+		"to_lower":       s.toLower,
+		"to_upper":       s.toUpper,
+		"trim":           s.trim,
+		"trim_left":      s.trimLeft,
+		"trim_right":     s.trimRight,
+		"split":          s.split,
+		"join":           s.join,
+		"match":          s.match,
+		"find_all":       s.findAll,
+		"contains":       s.contains,
+		"contains_any":   s.containsAny,
+		"index":          s.index,
+		"index_any":      s.indexAny,
+		"last_index":     s.lastIndex,
+		"last_index_any": s.lastIndexAny,
+		"repeat":         s.repeat,
 	}
 	m := make(Map, len(ps))
 	for name, fun := range ps {
@@ -214,4 +221,87 @@ func (packageStrings) findAll(fc FunctionCall) Value {
 		result[i] = String(value)
 	}
 	return Array(result)
+}
+
+func (packageStrings) contains(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) < 2 {
+		return Null
+	}
+
+	s := args[0].ToString()
+	substr := args[1].ToString()
+	return Bool(strings.Contains(s, substr))
+}
+
+func (packageStrings) containsAny(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) < 2 {
+		return Null
+	}
+
+	s := args[0].ToString()
+	substr := args[1].ToString()
+	return Bool(strings.ContainsAny(s, substr))
+}
+
+func (packageStrings) index(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) < 2 {
+		return Null
+	}
+
+	s := args[0].ToString()
+	substr := args[1].ToString()
+	return Int(strings.Index(s, substr))
+}
+
+func (packageStrings) indexAny(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) < 2 {
+		return Null
+	}
+
+	s := args[0].ToString()
+	substr := args[1].ToString()
+	return Int(strings.IndexAny(s, substr))
+}
+
+func (packageStrings) lastIndex(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) < 2 {
+		return Null
+	}
+
+	s := args[0].ToString()
+	substr := args[1].ToString()
+	return Int(strings.LastIndex(s, substr))
+}
+
+func (packageStrings) lastIndexAny(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) < 2 {
+		return Null
+	}
+
+	s := args[0].ToString()
+	substr := args[1].ToString()
+	return Int(strings.LastIndexAny(s, substr))
+}
+
+func (packageStrings) repeat(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) < 2 {
+		return Null
+	}
+
+	s := args[0].ToString()
+	count := int(args[1].ToInt())
+	if count < 0 {
+		return Null
+	}
+	if count > 0 && len(s)*count/count != len(s) {
+		return Null
+	}
+	return String(strings.Repeat(s, count))
 }

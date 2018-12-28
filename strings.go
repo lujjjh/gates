@@ -21,6 +21,7 @@ func (s packageStrings) export() Map {
 		"split":      s.split,
 		"join":       s.join,
 		"match":      s.match,
+		"find_all":   s.findAll,
 	}
 	m := make(Map, len(ps))
 	for name, fun := range ps {
@@ -194,4 +195,23 @@ func (s packageStrings) match(fc FunctionCall) Value {
 	}
 	m := newMatcher(result, pattern.SubexpNames())
 	return Map{"group": FunctionFunc(m.group)}
+}
+
+func (packageStrings) findAll(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) < 2 {
+		return Null
+	}
+	pattern, err := regexp.Compile(args[0].ToString())
+	if err != nil {
+		return Null
+	}
+	str := args[1].ToString()
+	results := pattern.FindAllString(str, -1)
+
+	result := make([]Value, len(results))
+	for i, value := range results {
+		result[i] = String(value)
+	}
+	return Array(result)
 }

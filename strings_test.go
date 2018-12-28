@@ -231,3 +231,14 @@ func TestMatch(t *testing.T) {
 	assertNil(err)
 	assertTrue(v.ToBool())
 }
+
+func TestFindALl(t *testing.T) {
+	v, err := r.RunString(`
+	(function() {
+		let results = strings.find_all("(?i)(foo)", "foo\nfOo\nFOO");
+		return results[0] == "foo" && results[1] == "fOo" && results[2] == "FOO";
+	})()
+	`)
+	assertNil(err)
+	assertTrue(v.ToBool())
+}

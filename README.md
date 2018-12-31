@@ -1,5 +1,7 @@
 # Gates
 
+[![Build Status](https://travis-ci.org/gates/gates.svg?branch=master)](https://travis-ci.org/gates/gates)
+
 > A very simple embedded language, designed for configuration.
 
 ## 特性

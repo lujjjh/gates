@@ -10,7 +10,11 @@ import (
 )
 
 // Represent returns a string containing a printable representation
-// of a value.
+// of a value. It detects circular references. In that case, it returns
+// a "[Circular]".
+//
+// Map's keys are sorted so that multiple calls on a map should produce
+// the same result.
 func Represent(x Value) string {
 	return represent(x, make(map[unsafe.Pointer]struct{}))
 }

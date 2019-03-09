@@ -140,8 +140,12 @@ func (e *compiledMapLit) emitGetter() {
 }
 
 func (e *compiledFunctionLit) emitGetter() {
-	j := len(e.c.program.code)
-	e.c.emit(nil, nil, newStash)
+	savedProgram := e.c.program
+	p := &Program{
+		src: e.c.program.src,
+	}
+	e.c.program = p
+	e.c.emit(newStash)
 	e.c.scope = newScope(e.c.scope)
 	for i, ident := range e.expr.ParameterList.List {
 		idx := e.c.scope.bindName(ident.Name)
@@ -151,12 +155,16 @@ func (e *compiledFunctionLit) emitGetter() {
 		e.c.compileStmt(stmt)
 	}
 	e.c.emit(loadNull, ret)
-	e.c.program.code[j] = newFunc(len(e.c.scope.names)<<24 | j + 2)
 	if !e.c.scope.visited {
-		e.c.toStashlessFunction(e.c.program.code[j+2:])
+		e.c.toStashlessFunction(e.c.program.code)
 	}
+	stackSize := len(e.c.scope.names)
 	e.c.scope = e.c.scope.outer
-	e.c.program.code[j+1] = jmp1(len(e.c.program.code) - (j + 1))
+	e.c.program = savedProgram
+	e.c.emit(&newFunc{
+		program:   p,
+		stackSize: stackSize,
+	})
 }
 
 func (e *compiledUnaryExpr) emitGetter() {

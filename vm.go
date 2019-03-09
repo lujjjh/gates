@@ -21,8 +21,9 @@ type stash struct {
 }
 
 type ctx struct {
-	stash  *stash
-	pc, bp int
+	program *Program
+	stash   *stash
+	pc, bp  int
 }
 
 var ErrStackOverflow = errors.New("stack overflow")
@@ -149,14 +150,16 @@ func (vm *vm) pushCtx() {
 		panic(ErrStackOverflow)
 	}
 	vm.callStack = append(vm.callStack, ctx{
-		stash: vm.stash,
-		pc:    vm.pc,
-		bp:    vm.bp,
+		program: vm.program,
+		stash:   vm.stash,
+		pc:      vm.pc,
+		bp:      vm.bp,
 	})
 }
 
 func (vm *vm) popCtx() {
 	l := len(vm.callStack) - 1
+	vm.program = vm.callStack[l].program
 	vm.stash = vm.callStack[l].stash
 	vm.pc = vm.callStack[l].pc
 	vm.bp = vm.callStack[l].bp
@@ -297,14 +300,15 @@ func (l newMap) exec(vm *vm) {
 	vm.pc++
 }
 
-type newFunc uint32
+type newFunc struct {
+	program   *Program
+	stackSize int
+}
 
 func (l newFunc) exec(vm *vm) {
-	pc := int(l & 0x00FFFFFF)
-	stackSize := int(l >> 24)
 	f := &literalFunction{
-		pc:        pc,
-		stackSize: stackSize,
+		program:   l.program,
+		stackSize: l.stackSize,
 		stash:     vm.stash,
 	}
 	vm.stack.Push(f)
@@ -689,17 +693,19 @@ func (_call) exec(vm *vm) {
 	case *nativeFunction:
 		argc := int(vm.stack.Pop().ToInt())
 		args := vm.stack.PopN(argc)
-		fc := &functionCall{args: args}
+		fc := &functionCall{vm: vm, args: args}
 		vm.stack.Push(f.fun(fc))
 		vm.pc++
 	case *literalFunction:
+		vm.pc++
 		vm.pushCtx()
 		vm.bp = vm.stack.sp
 		for i := 0; i < f.stackSize; i++ {
 			vm.stack.Push(Null)
 		}
 		vm.stash = f.stash
-		vm.pc = f.pc
+		vm.program = f.program
+		vm.pc = 0
 	default:
 		panic(fmt.Errorf("unsupported function type: %T", fun))
 	}
@@ -716,5 +722,7 @@ func (_ret) exec(vm *vm) {
 	vm.stack.l = vm.stack.l[:vm.stack.sp]
 	vm.stack.Push(returnValue)
 	vm.popCtx()
-	vm.pc++
+	if vm.pc < 0 {
+		vm.halt = true
+	}
 }

@@ -31,3 +31,18 @@ func builtInString(fc FunctionCall) Value {
 	}
 	return String(args[0].ToString())
 }
+
+func builtInMap(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) < 2 {
+		return Null
+	}
+	r := fc.Runtime()
+	f, base := args[0].ToFunction(), args[1]
+	length := int(objectGet(r, base, String("length")).ToInt())
+	result := make([]Value, length)
+	for i := 0; i < length; i++ {
+		result[i] = r.Call(f, objectGet(r, base, Int(i)), Int(i))
+	}
+	return Array(result)
+}

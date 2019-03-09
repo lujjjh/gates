@@ -7,9 +7,16 @@ import (
 	"testing"
 )
 
-type panicErr struct{}
+type panicErr struct {
+	message string
+}
 
-func (*panicErr) Error() string { return "assertion failed" }
+func (p *panicErr) Error() string {
+	if p.message != "" {
+		return p.message
+	}
+	return "assertion failed"
+}
 
 func mustRunStringWithGlobal(s string, global map[string]Value) Value {
 	r := New()
@@ -162,15 +169,30 @@ func TestRunFiles(t *testing.T) {
 			continue
 		}
 		r := New()
-		r.Global().Set("assert", FunctionFunc(func(fc FunctionCall) Value {
+		g := r.Global()
+		_assert := FunctionFunc(func(fc FunctionCall) Value {
 			args := fc.Args()
-			if len(args) < 1 {
-				panic(&panicErr{})
+			argc := len(args)
+			if argc < 1 {
+				panic(&panicErr{message: "assert takes at least 1 arguments"})
 			}
 			if !args[0].ToBool() {
-				panic(&panicErr{})
+				if argc < 2 {
+					panic(&panicErr{})
+				}
+				panic(&panicErr{message: args[1].ToString()})
 			}
 			return Bool(true)
+		})
+		g.Set("assert", _assert)
+		g.Set("assert_eq", FunctionFunc(func(fc FunctionCall) Value {
+			args := fc.Args()
+			argc := len(args)
+			if argc < 2 {
+				panic(&panicErr{message: "assert_equal takes 2 arguments"})
+			}
+			message := String(args[0].ToString() + " expected, got " + args[1].ToString())
+			return r.Call(_assert, Bool(args[0].Equals(args[1])), message)
 		}))
 		_, err = r.RunString(string(s))
 		if err != nil {

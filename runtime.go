@@ -148,3 +148,5 @@ func (r *Runtime) ToValue(i interface{}) Value {
 		return Ref{i}
 	}
 }
+
+func (r *Runtime) Context() context.Context { return r.vm.ctx }

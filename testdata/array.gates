@@ -3,4 +3,9 @@
     assert_eq(n - 1, i);
     return n * n;
   }, [ 1, 2, 3 ]));
+
+  assert_eq([ 2, 4 ], filter(function (n, i) {
+    assert_eq(n - 1, i);
+    return n % 2 == 0;
+  }, [ 1, 2, 3, 4 ]));
 })()

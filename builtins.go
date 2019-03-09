@@ -46,3 +46,21 @@ func builtInMap(fc FunctionCall) Value {
 	}
 	return Array(result)
 }
+
+func builtInFilter(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) < 2 {
+		return Null
+	}
+	r := fc.Runtime()
+	f, base := args[0].ToFunction(), args[1]
+	length := int(objectGet(r, base, String("length")).ToInt())
+	result := make([]Value, 0, length)
+	for i := 0; i < length; i++ {
+		v := objectGet(r, base, Int(i))
+		if r.Call(f, v, Int(i)).ToBool() {
+			result = append(result, v)
+		}
+	}
+	return Array(result)
+}

@@ -45,11 +45,11 @@ func TestRunString(t *testing.T) {
 	assertValue(t, Float(0.5), mustRunString("1 / 2"))
 	assertValue(t, String("he he"), mustRunString(`"he\x20" + "he"`))
 	assertValue(t, Float(1.5), mustRunString(`0 && true || 1.5`))
-	assertValue(t, Bool(true), mustRunString(`!(0 && true)`))
-	assertValue(t, Bool(true), mustRunString(`1 == "1"`))
-	assertValue(t, Bool(true), mustRunString(`"hehe" != ("1" == true)`))
-	assertValue(t, Bool(true), mustRunString("1.1 >= 1"))
-	assertValue(t, Bool(true), mustRunString(`"abc" > "aba"`))
+	assertValue(t, True, mustRunString(`!(0 && true)`))
+	assertValue(t, True, mustRunString(`1 == "1"`))
+	assertValue(t, True, mustRunString(`"hehe" != ("1" == true)`))
+	assertValue(t, True, mustRunString("1.1 >= 1"))
+	assertValue(t, True, mustRunString(`"abc" > "aba"`))
 	assertValue(t, String("hehe"), mustRunString(`null + "hehe"`))
 
 	assertValue(t, Int(42), mustRunStringWithGlobal(`a.b["c"]`, map[string]Value{
@@ -79,12 +79,12 @@ func TestRunString(t *testing.T) {
 		}),
 	}))
 
-	assertValue(t, Bool(true), mustRunString(`[] == []`))
-	assertValue(t, Bool(true), mustRunString(`[1] == [1]`))
-	assertValue(t, Bool(false), mustRunString(`[1] == [1, 2]`))
-	assertValue(t, Bool(true), mustRunString(`{} == {}`))
-	assertValue(t, Bool(true), mustRunString(`{ a: 1 } == { a: 1 }`))
-	assertValue(t, Bool(false), mustRunString(`{ a: 1 } == { a: 1, b: 2 }`))
+	assertValue(t, True, mustRunString(`[] == []`))
+	assertValue(t, True, mustRunString(`[1] == [1]`))
+	assertValue(t, False, mustRunString(`[1] == [1, 2]`))
+	assertValue(t, True, mustRunString(`{} == {}`))
+	assertValue(t, True, mustRunString(`{ a: 1 } == { a: 1 }`))
+	assertValue(t, False, mustRunString(`{ a: 1 } == { a: 1, b: 2 }`))
 
 	assertValue(t, Int(42), mustRunString(`[0, 42][1]`))
 	assertValue(t, String("bar"), mustRunString(`({foo: "bar"}).foo`))
@@ -182,7 +182,7 @@ func TestRunExamples(t *testing.T) {
 				}
 				panic(&panicErr{message: args[1].ToString()})
 			}
-			return Bool(true)
+			return True
 		})
 		g.Set("assert", _assert)
 		g.Set("assert_eq", FunctionFunc(func(fc FunctionCall) Value {

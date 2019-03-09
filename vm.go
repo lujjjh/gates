@@ -628,7 +628,7 @@ func (_lt) exec(vm *vm) {
 	x := vm.stack.Pop()
 	ret := less(x, y)
 	if ret == Null {
-		vm.stack.Push(Bool(false))
+		vm.stack.Push(False)
 	} else {
 		vm.stack.Push(ret)
 	}
@@ -643,10 +643,10 @@ func (_lte) exec(vm *vm) {
 	y := vm.stack.Pop()
 	x := vm.stack.Pop()
 	ret := less(y, x)
-	if ret == Null || ret == Bool(true) {
-		vm.stack.Push(Bool(false))
+	if ret == Null || ret == True {
+		vm.stack.Push(False)
 	} else {
-		vm.stack.Push(Bool(true))
+		vm.stack.Push(True)
 	}
 	vm.pc++
 }
@@ -660,7 +660,7 @@ func (_gt) exec(vm *vm) {
 	x := vm.stack.Pop()
 	ret := less(y, x)
 	if ret == Null {
-		vm.stack.Push(Bool(false))
+		vm.stack.Push(False)
 	} else {
 		vm.stack.Push(ret)
 	}
@@ -675,10 +675,10 @@ func (_gte) exec(vm *vm) {
 	y := vm.stack.Pop()
 	x := vm.stack.Pop()
 	ret := less(x, y)
-	if ret == Null || ret == Bool(true) {
-		vm.stack.Push(Bool(false))
+	if ret == Null || ret == True {
+		vm.stack.Push(False)
 	} else {
-		vm.stack.Push(Bool(true))
+		vm.stack.Push(True)
 	}
 	vm.pc++
 }

@@ -3,7 +3,7 @@ package gates
 func builtInBool(fc FunctionCall) Value {
 	args := fc.Args()
 	if len(args) == 0 {
-		return Bool(false)
+		return False
 	}
 	return Bool(args[0].ToBool())
 }

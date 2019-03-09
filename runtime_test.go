@@ -148,8 +148,8 @@ func TestRunProgramStackOverflow(t *testing.T) {
 	}
 }
 
-func TestRunFiles(t *testing.T) {
-	fileInfo, err := ioutil.ReadDir("testdata/")
+func TestRunExamples(t *testing.T) {
+	fileInfo, err := ioutil.ReadDir("examples/")
 	if err != nil {
 		t.Error(err)
 		return
@@ -163,7 +163,7 @@ func TestRunFiles(t *testing.T) {
 			continue
 		}
 
-		s, err := ioutil.ReadFile("testdata/" + name)
+		s, err := ioutil.ReadFile("examples/" + name)
 		if err != nil {
 			t.Error(err)
 			continue

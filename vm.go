@@ -98,6 +98,7 @@ func (s *stash) getByIdx(idx uint32) Value {
 
 type vm struct {
 	r         *Runtime
+	ctx       context.Context
 	halt      bool
 	pc        int
 	stack     valueStack
@@ -119,7 +120,7 @@ func (vm *vm) init() {
 	vm.callStack = nil
 }
 
-func (vm *vm) run(ctx context.Context) (err error) {
+func (vm *vm) run() (err error) {
 	defer func() {
 		r := recover()
 		if r != nil {
@@ -134,6 +135,7 @@ func (vm *vm) run(ctx context.Context) (err error) {
 	}()
 
 	vm.halt = false
+	ctx := vm.ctx
 	for !vm.halt {
 		select {
 		case <-ctx.Done():

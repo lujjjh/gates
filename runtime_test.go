@@ -7,9 +7,16 @@ import (
 	"testing"
 )
 
-type panicErr struct{}
+type panicErr struct {
+	message string
+}
 
-func (*panicErr) Error() string { return "assertion failed" }
+func (p *panicErr) Error() string {
+	if p.message != "" {
+		return p.message
+	}
+	return "assertion failed"
+}
 
 func mustRunStringWithGlobal(s string, global map[string]Value) Value {
 	r := New()
@@ -38,11 +45,11 @@ func TestRunString(t *testing.T) {
 	assertValue(t, Float(0.5), mustRunString("1 / 2"))
 	assertValue(t, String("he he"), mustRunString(`"he\x20" + "he"`))
 	assertValue(t, Float(1.5), mustRunString(`0 && true || 1.5`))
-	assertValue(t, Bool(true), mustRunString(`!(0 && true)`))
-	assertValue(t, Bool(true), mustRunString(`1 == "1"`))
-	assertValue(t, Bool(true), mustRunString(`"hehe" != ("1" == true)`))
-	assertValue(t, Bool(true), mustRunString("1.1 >= 1"))
-	assertValue(t, Bool(true), mustRunString(`"abc" > "aba"`))
+	assertValue(t, True, mustRunString(`!(0 && true)`))
+	assertValue(t, True, mustRunString(`1 == "1"`))
+	assertValue(t, True, mustRunString(`"hehe" != ("1" == true)`))
+	assertValue(t, True, mustRunString("1.1 >= 1"))
+	assertValue(t, True, mustRunString(`"abc" > "aba"`))
 	assertValue(t, String("hehe"), mustRunString(`null + "hehe"`))
 
 	assertValue(t, Int(42), mustRunStringWithGlobal(`a.b["c"]`, map[string]Value{
@@ -72,12 +79,12 @@ func TestRunString(t *testing.T) {
 		}),
 	}))
 
-	assertValue(t, Bool(true), mustRunString(`[] == []`))
-	assertValue(t, Bool(true), mustRunString(`[1] == [1]`))
-	assertValue(t, Bool(false), mustRunString(`[1] == [1, 2]`))
-	assertValue(t, Bool(true), mustRunString(`{} == {}`))
-	assertValue(t, Bool(true), mustRunString(`{ a: 1 } == { a: 1 }`))
-	assertValue(t, Bool(false), mustRunString(`{ a: 1 } == { a: 1, b: 2 }`))
+	assertValue(t, True, mustRunString(`[] == []`))
+	assertValue(t, True, mustRunString(`[1] == [1]`))
+	assertValue(t, False, mustRunString(`[1] == [1, 2]`))
+	assertValue(t, True, mustRunString(`{} == {}`))
+	assertValue(t, True, mustRunString(`{ a: 1 } == { a: 1 }`))
+	assertValue(t, False, mustRunString(`{ a: 1 } == { a: 1, b: 2 }`))
 
 	assertValue(t, Int(42), mustRunString(`[0, 42][1]`))
 	assertValue(t, String("bar"), mustRunString(`({foo: "bar"}).foo`))
@@ -141,8 +148,8 @@ func TestRunProgramStackOverflow(t *testing.T) {
 	}
 }
 
-func TestRunFiles(t *testing.T) {
-	fileInfo, err := ioutil.ReadDir("testdata/")
+func TestRunExamples(t *testing.T) {
+	fileInfo, err := ioutil.ReadDir("examples/")
 	if err != nil {
 		t.Error(err)
 		return
@@ -156,21 +163,36 @@ func TestRunFiles(t *testing.T) {
 			continue
 		}
 
-		s, err := ioutil.ReadFile("testdata/" + name)
+		s, err := ioutil.ReadFile("examples/" + name)
 		if err != nil {
 			t.Error(err)
 			continue
 		}
 		r := New()
-		r.Global().Set("assert", FunctionFunc(func(fc FunctionCall) Value {
+		g := r.Global()
+		_assert := FunctionFunc(func(fc FunctionCall) Value {
 			args := fc.Args()
-			if len(args) < 1 {
-				panic(&panicErr{})
+			argc := len(args)
+			if argc < 1 {
+				panic(&panicErr{message: "assert takes at least 1 arguments"})
 			}
 			if !args[0].ToBool() {
-				panic(&panicErr{})
+				if argc < 2 {
+					panic(&panicErr{})
+				}
+				panic(&panicErr{message: args[1].ToString()})
 			}
-			return Bool(true)
+			return True
+		})
+		g.Set("assert", _assert)
+		g.Set("assert_eq", FunctionFunc(func(fc FunctionCall) Value {
+			args := fc.Args()
+			argc := len(args)
+			if argc < 2 {
+				panic(&panicErr{message: "assert_equal takes 2 arguments"})
+			}
+			message := String(args[0].ToString() + " expected, got " + args[1].ToString())
+			return r.Call(_assert, Bool(args[0].Equals(args[1])), message)
 		}))
 		_, err = r.RunString(string(s))
 		if err != nil {

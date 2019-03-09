@@ -23,4 +23,8 @@ func (g *Global) initBuiltIns() {
 	g.Set("int", FunctionFunc(builtInInt))
 	g.Set("number", FunctionFunc(builtInNumber))
 	g.Set("string", FunctionFunc(builtInString))
+
+	g.Set("map", FunctionFunc(builtInMap))
+	g.Set("filter", FunctionFunc(builtInFilter))
+	g.Set("reduce", FunctionFunc(builtInReduce))
 }

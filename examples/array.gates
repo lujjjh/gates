@@ -1,0 +1,40 @@
+(function () {
+  assert_eq([ 1, 4, 9 ], map(function (n, i) {
+    assert_eq(n - 1, i);
+    return n * n;
+  }, [ 1, 2, 3 ]));
+
+  assert_eq([ 2, 4 ], filter(function (n, i) {
+    assert_eq(n - 1, i);
+    return n % 2 == 0;
+  }, [ 1, 2, 3, 4 ]));
+
+  {
+    let base = [ 1, 2, 3, 4 ];
+    let first = true;
+    assert_eq(10, reduce(function (acc, current, i, array) {
+      if (first) {
+        assert_eq(1, acc);
+        assert_eq(2, current);
+        first = false;
+      }
+      assert_eq(current - 1, i);
+      assert_eq(base, array);
+      return acc + current;
+    }, base));
+
+    first = true;
+    assert_eq(10, reduce(function (acc, current, i, array) {
+      if (first) {
+        assert_eq(0, acc);
+        assert_eq(1, current);
+        first = false;
+      }
+      assert_eq(current - 1, i);
+      assert_eq(base, array);
+      return acc + current;
+    }, base, 0));
+  }
+
+  assert_eq(null, reduce(function () { return 1; }, []));
+})()

@@ -10,14 +10,17 @@ type Function interface {
 }
 
 type FunctionCall interface {
+	Runtime() *Runtime
 	Args() []Value
 }
 
 type functionCall struct {
+	vm   *vm
 	args []Value
 }
 
-func (fc *functionCall) Args() []Value { return fc.args }
+func (fc *functionCall) Runtime() *Runtime { return fc.vm.r }
+func (fc *functionCall) Args() []Value     { return fc.args }
 
 func FunctionFunc(fun func(FunctionCall) Value) Function {
 	return &nativeFunction{fun: fun}
@@ -52,7 +55,7 @@ func (f *nativeFunction) Equals(other Value) bool {
 func (f *nativeFunction) SameAs(other Value) bool { return f.Equals(other) }
 
 type literalFunction struct {
-	pc        int
+	program   *Program
 	stackSize int
 	stash     *stash
 }

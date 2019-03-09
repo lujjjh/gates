@@ -75,6 +75,36 @@ func (r *Runtime) RunString(s string) (Value, error) {
 	return r.RunProgram(context.Background(), program)
 }
 
+func (r *Runtime) Call(f Function, args ...Value) Value {
+	switch f := f.(type) {
+	case *nativeFunction:
+		return f.fun(&functionCall{vm: r.vm, args: args})
+	case *literalFunction:
+		vm := r.vm
+		for i := range args {
+			vm.stack.Push(args[i])
+		}
+		vm.stack.Push(Int(len(args)))
+		pc := vm.pc
+		vm.pc = -1
+		vm.pushCtx()
+		vm.bp = vm.stack.sp
+		for i := 0; i < f.stackSize; i++ {
+			vm.stack.Push(Null)
+		}
+		vm.stash = f.stash
+		vm.program = f.program
+		vm.pc = 0
+		if err := vm.run(context.Background()); err != nil {
+			panic(err)
+		}
+		vm.halt = false
+		vm.pc = pc
+		return vm.stack.Pop()
+	}
+	return Null
+}
+
 func (r *Runtime) ToValue(i interface{}) Value {
 	switch i := i.(type) {
 	case nil:

@@ -61,7 +61,8 @@ func (r *Runtime) Global() *Global {
 func (r *Runtime) RunProgram(ctx context.Context, program *Program) (Value, error) {
 	r.vm.program = program
 	r.vm.pc = 0
-	if err := r.vm.run(ctx); err != nil {
+	r.vm.ctx = ctx
+	if err := r.vm.run(); err != nil {
 		return nil, err
 	}
 	return r.vm.stack.Pop(), nil
@@ -95,7 +96,7 @@ func (r *Runtime) Call(f Function, args ...Value) Value {
 		vm.stash = f.stash
 		vm.program = f.program
 		vm.pc = 0
-		if err := vm.run(context.Background()); err != nil {
+		if err := vm.run(); err != nil {
 			panic(err)
 		}
 		vm.halt = false

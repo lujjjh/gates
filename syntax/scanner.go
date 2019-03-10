@@ -317,6 +317,7 @@ func (s *Scanner) scanString(quote rune) string {
 
 // Scan scans tokens.
 func (s *Scanner) Scan() (pos Pos, tok Token, lit string) {
+AGAIN:
 	s.skipWhitespace()
 
 	// current token start
@@ -388,6 +389,13 @@ func (s *Scanner) Scan() (pos Pos, tok Token, lit string) {
 		case '*':
 			tok = MUL
 		case '/':
+			if s.ch == '/' { // single-line comment?
+				s.next()
+				for s.ch != '\n' && s.ch != -1 {
+					s.next()
+				}
+				goto AGAIN
+			}
 			tok = QUO
 		case '%':
 			tok = REM

@@ -68,6 +68,8 @@ func (f Float) ToNative() interface{} { return f.ToFloat() }
 
 func (f Float) Equals(other Value) bool {
 	switch {
+	case other.IsInt():
+		return f.ToFloat() == other.ToFloat()
 	case other.IsFloat():
 		return f.ToFloat() == other.ToFloat()
 	case other.IsString():

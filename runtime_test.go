@@ -189,10 +189,19 @@ func TestRunExamples(t *testing.T) {
 			args := fc.Args()
 			argc := len(args)
 			if argc < 2 {
-				panic(&panicErr{message: "assert_equal takes 2 arguments"})
+				panic(&panicErr{message: "assert_eq takes 2 arguments"})
 			}
 			message := String(args[0].ToString() + " expected, got " + args[1].ToString())
 			return r.Call(_assert, Bool(args[0].Equals(args[1])), message)
+		}))
+		g.Set("assert_ne", FunctionFunc(func(fc FunctionCall) Value {
+			args := fc.Args()
+			argc := len(args)
+			if argc < 2 {
+				panic(&panicErr{message: "assert_ne takes 2 arguments"})
+			}
+			message := String(args[0].ToString() + " not expected")
+			return r.Call(_assert, Bool(!args[0].Equals(args[1])), message)
 		}))
 		_, err = r.RunString(string(s))
 		if err != nil {

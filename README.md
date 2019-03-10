@@ -2,49 +2,46 @@
 
 [![Build Status](https://travis-ci.org/gates/gates.svg?branch=master)](https://travis-ci.org/gates/gates)
 
-> A very simple embedded language, designed for configuration.
+> An embedded language interacting with Go.
 
-## 特性
+## Features
 
-* 弱类型
-* 语法类似 JavaScript
+- Easily embedded in and interacting with Go.
+- JavaScript-like syntax with native int64 support.
+- First class functions.
+- Execution time limit.
 
-## 内置类型
+## Why?
 
-* Number
-* String
-* Bool
-* Map
-* Array
+### Why Gates?
 
-## 语法
+Gates is designed to be an interpreted language embedded in Go. It aims to providing a
+relatively controllable VM so that multiple VMs could run _untrusted_ code in the same process
+with maximum execution time set.
 
-### Number
+### Why not Lua?
 
-与 Go 的 int64 / float64 语法一致。
+Lua is great except that arrays and maps are both represented as `table`. In our use cases,
+we need to distinguish between empty arrays and empty maps to produce a correct JSON string.
 
-`1.5`、`42`、`-1e5`
+### Why not JavaScript?
 
-### String
+int64 :).
 
-必须使用双引号。
+## Data Types
 
-`"Hello\nworld"`
+- number (int64 / float64)
+- string
+- bool
+- map
+- array
+- function
 
-`assert("Hello"[0] == "H")`
-`assert("Hello".length == 5)`
+## Examples
 
-### Bool
+[View Examples](/examples/)
 
-`true` / `false`
+## Credits
 
-### 逻辑表达式
-
-惰性求值
-
-`assert(true && 0 || "hello" == "hello")`
-
-## 参考
-
-* https://golang.org/pkg/go/
-* https://github.com/dop251/goja/
+- https://github.com/dop251/goja/
+- https://golang.org/pkg/go/

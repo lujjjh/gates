@@ -9,6 +9,24 @@
 - Easily embedded in and interacting with Go.
 - JavaScript-like syntax with native int64 support.
 - First class functions.
+- Execution time limit.
+
+## Why?
+
+### Why Gates?
+
+Gates is designed to be an interpreted language embedded in Go. It aims to providing a
+relatively controllable VM so that multiple VMs could run _untrusted_ code in the same process
+with maximum execution time set.
+
+### Why not Lua?
+
+Lua is great except that arrays and maps are both represented as `table`. In our use cases,
+we need to distinguish between empty arrays and empty maps to produce a correct JSON string.
+
+### Why not JavaScript?
+
+int64 :).
 
 ## Data Types
 

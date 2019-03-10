@@ -446,7 +446,7 @@ func (p *parser) parseStmt() Stmt {
 		return p.parseBodyStmt()
 	case LET:
 		return p.parseLetStmt()
-	case IDENT:
+	case IDENT, LBRACK: // FIXME: array literals as lhs
 		s := p.parseSimpleStmt()
 		p.expect(SEMICOLON)
 		return s

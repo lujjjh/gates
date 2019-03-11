@@ -4,6 +4,7 @@ import (
 	"math"
 	"reflect"
 	"strings"
+	"unsafe"
 )
 
 var sharedRuntime Runtime
@@ -39,9 +40,21 @@ func (_Array) ToBool() bool         { return true }
 func (_Array) ToFunction() Function { return _EmptyFunction }
 
 func (a _Array) ToNative() interface{} {
-	result := make([]interface{}, 0, len(a.values))
-	for _, value := range a.values {
-		result = append(result, value.ToNative())
+	return toNative(nil, a)
+}
+
+func (a _Array) toNative(seen map[unsafe.Pointer]interface{}) interface{} {
+	if a.values == nil {
+		return []interface{}(nil)
+	}
+	addr := unsafe.Pointer(reflect.ValueOf(a.values).Pointer())
+	if v, ok := seen[addr]; ok {
+		return v
+	}
+	result := make([]interface{}, len(a.values))
+	seen[addr] = result
+	for i := range a.values {
+		result[i] = toNative(seen, a.values[i])
 	}
 	return result
 }

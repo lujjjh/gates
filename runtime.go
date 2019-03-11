@@ -2,6 +2,7 @@ package gates
 
 import (
 	"context"
+	"unsafe"
 
 	"github.com/gates/gates/syntax"
 )
@@ -150,3 +151,17 @@ func (r *Runtime) ToValue(i interface{}) Value {
 }
 
 func (r *Runtime) Context() context.Context { return r.vm.ctx }
+
+type toNativer interface {
+	toNative(seen map[unsafe.Pointer]interface{}) interface{}
+}
+
+func toNative(seen map[unsafe.Pointer]interface{}, v Value) (result interface{}) {
+	if seen == nil {
+		seen = make(map[unsafe.Pointer]interface{})
+	}
+	if toNativer, haveToNativer := v.(toNativer); haveToNativer {
+		return toNativer.toNative(seen)
+	}
+	return v.ToNative()
+}

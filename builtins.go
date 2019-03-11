@@ -68,22 +68,14 @@ func builtInFilter(fc FunctionCall) Value {
 func builtInReduce(fc FunctionCall) Value {
 	args := fc.Args()
 	argc := len(args)
-	if argc < 2 {
+	if argc < 3 {
 		return Null
 	}
 	r := fc.Runtime()
-	f, base := args[0].ToFunction(), args[1]
+	f, initial, base := args[0].ToFunction(), args[1], args[2]
 	length := int(objectGet(r, base, String("length")).ToInt())
-	initial := Value(Null)
-	i := 1
-	if argc >= 3 {
-		initial = args[2]
-		i = 0
-	} else if length > 0 {
-		initial = objectGet(r, base, Int(0))
-	}
 	acc := initial
-	for ; i < length; i++ {
+	for i := 0; i < length; i++ {
 		v := objectGet(r, base, Int(i))
 		acc = r.Call(f, acc, v, Int(i), base)
 	}

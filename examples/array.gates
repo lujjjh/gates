@@ -14,18 +14,6 @@
     let first = true;
     assert_eq(10, reduce(function (acc, current, i, array) {
       if (first) {
-        assert_eq(1, acc);
-        assert_eq(2, current);
-        first = false;
-      }
-      assert_eq(current - 1, i);
-      assert_eq(base, array);
-      return acc + current;
-    }, base));
-
-    first = true;
-    assert_eq(10, reduce(function (acc, current, i, array) {
-      if (first) {
         assert_eq(0, acc);
         assert_eq(1, current);
         first = false;
@@ -33,7 +21,7 @@
       assert_eq(current - 1, i);
       assert_eq(base, array);
       return acc + current;
-    }, base, 0));
+    }, 0, base));
   }
 
   assert_eq(null, reduce(function () { return 1; }, []));

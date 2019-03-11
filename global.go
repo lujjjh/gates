@@ -27,4 +27,8 @@ func (g *Global) initBuiltIns() {
 	g.Set("map", FunctionFunc(builtInMap))
 	g.Set("filter", FunctionFunc(builtInFilter))
 	g.Set("reduce", FunctionFunc(builtInReduce))
+	g.Set("find", FunctionFunc(builtInFind))
+	g.Set("find_index", FunctionFunc(builtInFindIndex))
+	g.Set("find_last", FunctionFunc(builtInFindLast))
+	g.Set("find_last_index", FunctionFunc(builtInFindLastIndex))
 }

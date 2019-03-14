@@ -106,4 +106,12 @@
     };
     assert_eq(89, fib(10));
   }
+
+  // block visibility
+  assert_eq(null, (function (i) {
+    for (let i = 0; i < 2; i = i + 1) {
+      i;
+    }
+    return i;
+  })());
 })()

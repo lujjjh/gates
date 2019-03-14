@@ -213,9 +213,17 @@ func (c *compiler) compileFunctionLit(e *syntax.FunctionLit) compiledExpr {
 
 func (c *compiler) toStashlessFunction(code []instruction) {
 	code[0] = noop
+	inStash := 0
 	for i, ins := range code {
 		switch ins := ins.(type) {
+		case _newStash:
+			inStash++
+		case _popStash:
+			inStash--
 		case loadLocal:
+			if inStash > 0 {
+				continue
+			}
 			level := int(ins >> 24)
 			idx := uint32(ins & 0x00FFFFFF)
 			level--
@@ -225,6 +233,9 @@ func (c *compiler) toStashlessFunction(code []instruction) {
 			}
 			code[i] = loadLocal(uint32(level)<<24 | idx)
 		case storeLocal:
+			if inStash > 0 {
+				continue
+			}
 			level := int(ins >> 24)
 			idx := uint32(ins & 0x00FFFFFF)
 			level--

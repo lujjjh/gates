@@ -3,10 +3,17 @@ package gates
 import (
 	"math"
 	"reflect"
+	"sort"
 	"unsafe"
 )
 
 type Map map[string]Value
+
+type mapIter struct {
+	m    Map
+	i    int
+	keys []string
+}
 
 func (Map) IsString() bool   { return false }
 func (Map) IsInt() bool      { return false }
@@ -63,4 +70,31 @@ func (m Map) Set(r *Runtime, key, value Value) {
 		return
 	}
 	m[key.ToString()] = value
+}
+
+func (m Map) Iterator() Iterator {
+	var keys []string
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return &mapIter{m: m, i: 0, keys: keys}
+}
+
+func (m *mapIter) Next() (Value, bool) {
+SkipEmpty:
+	i := m.i
+	if i >= 0 && i < len(m.keys) {
+		m.i++
+		k := m.keys[i]
+		if _, ok := m.m[k]; !ok {
+			goto SkipEmpty
+		}
+		v := m.m[k]
+		return Map(map[string]Value{
+			"key":   String(k),
+			"value": v,
+		}), true
+	}
+	return Null, false
 }

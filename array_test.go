@@ -19,3 +19,23 @@ func TestArrayToNative(t *testing.T) {
 
 	assert.Equal(t, []interface{}(nil), Array(nil).ToNative())
 }
+
+func TestArrayIterator(t *testing.T) {
+	a := Array([]Value{}).(_Array)
+	it := a.Iterator()
+	value, ok := it.Next()
+	assert.Equal(t, Null, value)
+	assert.False(t, ok)
+
+	a = Array([]Value{Int(42), String("foo")}).(_Array)
+	it = a.Iterator()
+	value, ok = it.Next()
+	assert.Equal(t, Int(42), value)
+	assert.True(t, ok)
+	value, ok = it.Next()
+	assert.Equal(t, String("foo"), value)
+	assert.True(t, ok)
+	value, ok = it.Next()
+	assert.Equal(t, Null, value)
+	assert.False(t, ok)
+}

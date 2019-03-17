@@ -84,11 +84,19 @@ func (p *parser) parseIdent() *Ident {
 
 func (p *parser) parseArrayLit() *ArrayLit {
 	lbrack := p.expect(LBRACK)
-	var elemList []Expr
+	var elemList []ArrayLitEntry
 	if p.tok != RBRACK {
 		for {
-			elem := p.parseExpr()
-			elemList = append(elemList, elem)
+			expanded := false
+			if p.tok == ELLIPSIS {
+				p.next()
+				expanded = true
+			}
+			value := p.parseExpr()
+			elemList = append(elemList, ArrayLitEntry{
+				Expanded: expanded,
+				Value:    value,
+			})
 			if p.tok != COMMA {
 				break
 			}
@@ -108,24 +116,33 @@ func (p *parser) parseMapLit() *MapLit {
 	var entries []MapLitEntry
 	if p.tok != RBRACE {
 		for {
-			var key Expr
-			if p.tok == LBRACK {
+			if p.tok == ELLIPSIS {
 				p.next()
-				key = p.parseExpr()
-				p.expect(RBRACK)
-			} else if p.tok == IDENT {
-				ident := p.parseIdent()
-				key = &Lit{
-					ValuePos: ident.NamePos,
-					Kind:     STRING,
-					Value:    strconv.Quote(ident.Name),
-				}
+				value := p.parseExpr()
+				entries = append(entries, MapLitEntry{
+					Expanded: true,
+					Value:    value,
+				})
 			} else {
-				key = p.parseOperand()
+				var key Expr
+				if p.tok == LBRACK {
+					p.next()
+					key = p.parseExpr()
+					p.expect(RBRACK)
+				} else if p.tok == IDENT {
+					ident := p.parseIdent()
+					key = &Lit{
+						ValuePos: ident.NamePos,
+						Kind:     STRING,
+						Value:    strconv.Quote(ident.Name),
+					}
+				} else {
+					key = p.parseOperand()
+				}
+				p.expect(COLON)
+				value := p.parseExpr()
+				entries = append(entries, MapLitEntry{Key: key, Value: value})
 			}
-			p.expect(COLON)
-			value := p.parseExpr()
-			entries = append(entries, MapLitEntry{Key: key, Value: value})
 			if p.tok != COMMA {
 				break
 			}

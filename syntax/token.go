@@ -53,11 +53,12 @@ const (
 	LEQ // <=
 	GEQ // >=
 
-	LPAREN // (
-	LBRACK // [
-	LBRACE // {
-	COMMA  // ,
-	PERIOD // .
+	LPAREN   // (
+	LBRACK   // [
+	LBRACE   // {
+	COMMA    // ,
+	PERIOD   // .
+	ELLIPSIS // ...
 
 	RPAREN    // )
 	RBRACK    // ]
@@ -109,11 +110,12 @@ var tokens = [...]string{
 	LEQ: "<=",
 	GEQ: ">=",
 
-	LPAREN: "(",
-	LBRACK: "[",
-	LBRACE: "{",
-	COMMA:  ",",
-	PERIOD: ".",
+	LPAREN:   "(",
+	LBRACK:   "[",
+	LBRACE:   "{",
+	COMMA:    ",",
+	PERIOD:   ".",
+	ELLIPSIS: "...",
 
 	RPAREN:    ")",
 	RBRACK:    "]",

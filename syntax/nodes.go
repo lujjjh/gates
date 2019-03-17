@@ -30,16 +30,22 @@ type (
 		Value    string
 	}
 
+	ArrayLitEntry struct {
+		Expanded bool
+		Value    Expr
+	}
+
 	ArrayLit struct {
 		expr
 		Lbrack   Pos
-		ElemList []Expr
+		ElemList []ArrayLitEntry
 		Rbrack   Pos
 	}
 
 	MapLitEntry struct {
-		Key   Expr
-		Value Expr
+		Expanded bool
+		Key      Expr
+		Value    Expr
 	}
 
 	MapLit struct {

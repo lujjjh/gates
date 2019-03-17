@@ -125,18 +125,29 @@ func (e *compiledLit) emitGetter() {
 }
 
 func (e *compiledArrayLit) emitGetter() {
+	e.c.emit(newArray(0))
 	for _, elem := range e.expr.ElemList {
-		e.c.compileExpr(elem).emitGetter()
+		e.c.compileExpr(elem.Value).emitGetter()
+		if elem.Expanded {
+			e.c.emit(arrayConcat)
+		} else {
+			e.c.emit(arrayPush)
+		}
 	}
-	e.c.emit(newArray(len(e.expr.ElemList)))
 }
 
 func (e *compiledMapLit) emitGetter() {
+	e.c.emit(newMap(0))
 	for _, entry := range e.expr.Entries {
-		e.c.compileExpr(entry.Key).emitGetter()
-		e.c.compileExpr(entry.Value).emitGetter()
+		if entry.Expanded {
+			e.c.compileExpr(entry.Value).emitGetter()
+			e.c.emit(mapConcat)
+		} else {
+			e.c.compileExpr(entry.Key).emitGetter()
+			e.c.compileExpr(entry.Value).emitGetter()
+			e.c.emit(mapSet)
+		}
 	}
-	e.c.emit(newMap(len(e.expr.Entries)))
 }
 
 func (e *compiledFunctionLit) emitGetter() {

@@ -287,6 +287,44 @@ func (l newArray) exec(vm *vm) {
 	vm.pc++
 }
 
+var arrayPush _arrayPush
+
+type _arrayPush struct{}
+
+func (l _arrayPush) exec(vm *vm) {
+	value := vm.stack.Pop()
+	array := vm.stack.Pop().(_Array)
+	array.push(value)
+	vm.stack.Push(array)
+	vm.pc++
+}
+
+var arrayConcat _arrayConcat
+
+type _arrayConcat struct{}
+
+func (l _arrayConcat) exec(vm *vm) {
+	array2 := vm.stack.Pop()
+	array := vm.stack.Pop().(_Array)
+	iterable, ok := array2.(Iterable)
+	if !ok {
+		goto End
+	}
+	{
+		it := iterable.Iterator()
+		for {
+			value, ok := it.Next()
+			if !ok {
+				break
+			}
+			array.push(value)
+		}
+	}
+End:
+	vm.stack.Push(array)
+	vm.pc++
+}
+
 type newMap uint
 
 func (l newMap) exec(vm *vm) {
@@ -298,6 +336,47 @@ func (l newMap) exec(vm *vm) {
 		value := kvs[i+1]
 		m[key.ToString()] = value
 	}
+	vm.stack.Push(m)
+	vm.pc++
+}
+
+var mapSet _mapSet
+
+type _mapSet struct{}
+
+func (l _mapSet) exec(vm *vm) {
+	v := vm.stack.Pop()
+	k := vm.stack.Pop()
+	m := vm.stack.Pop().(Map)
+	m[k.ToString()] = v
+	vm.stack.Push(m)
+	vm.pc++
+}
+
+var mapConcat _mapConcat
+
+type _mapConcat struct{}
+
+func (l _mapConcat) exec(vm *vm) {
+	m2 := vm.stack.Pop()
+	m := vm.stack.Pop().(Map)
+	iterable, ok := m2.(Iterable)
+	if !ok {
+		goto End
+	}
+	{
+		it := iterable.Iterator()
+		for {
+			entry, ok := it.Next()
+			if !ok {
+				break
+			}
+			k := objectGet(vm.r, entry, String("key")).ToString()
+			v := objectGet(vm.r, entry, String("value"))
+			m[k] = v
+		}
+	}
+End:
 	vm.stack.Push(m)
 	vm.pc++
 }

@@ -115,3 +115,7 @@ func (a *arrayIter) Next() (Value, bool) {
 	}
 	return Null, false
 }
+
+func (a *_Array) push(value Value) {
+	a.values = append(a.values, value)
+}

@@ -362,6 +362,14 @@ AGAIN:
 			if '0' <= s.ch && s.ch <= '9' {
 				tok = NUMBER
 				lit = s.scanNumber(true)
+			} else if s.ch == '.' {
+				s.next()
+				if s.ch == '.' {
+					tok = ELLIPSIS
+				} else {
+					tok = ILLEGAL
+				}
+				s.next()
 			} else {
 				tok = PERIOD
 			}

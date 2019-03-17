@@ -60,6 +60,7 @@ var scanTokens = [...]elt{
 	{LBRACE, "{"},
 	{COMMA, ","},
 	{PERIOD, "."},
+	{ELLIPSIS, "..."},
 
 	{RPAREN, ")"},
 	{RBRACK, "]"},

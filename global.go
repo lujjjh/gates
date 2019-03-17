@@ -31,4 +31,7 @@ func (g *Global) initBuiltIns() {
 	g.Set("find_index", FunctionFunc(builtInFindIndex))
 	g.Set("find_last", FunctionFunc(builtInFindLast))
 	g.Set("find_last_index", FunctionFunc(builtInFindLastIndex))
+
+	g.Set("to_entries", FunctionFunc(builtInToEntries))
+	g.Set("from_entries", FunctionFunc(builtInFromEntries))
 }

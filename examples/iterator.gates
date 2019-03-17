@@ -1,0 +1,19 @@
+(function () {
+  assert_eq([], to_entries({}));
+  assert_eq([
+    { key: "bar", value: "baz" },
+    { key: "foo", value: 42 }
+  ], to_entries({
+    foo: 42,
+    bar: "baz"
+  }));
+
+  assert_eq({}, from_entries([]));
+  assert_eq({
+    foo: 42,
+    bar: "baz"
+  }, from_entries([
+    { key: "bar", value: "baz" },
+    { key: "foo", value: 42 }
+  ]));
+})()

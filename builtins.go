@@ -149,3 +149,48 @@ func builtInFindLastIndex(fc FunctionCall) Value {
 	}
 	return Int(-1)
 }
+
+func builtInToEntries(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) < 1 {
+		return Null
+	}
+	iterable, ok := args[0].(Iterable)
+	if !ok {
+		return Null
+	}
+	entries := make([]Value, 0)
+	it := iterable.Iterator()
+	for {
+		value, ok := it.Next()
+		if !ok {
+			break
+		}
+		entries = append(entries, value)
+	}
+	return Array(entries)
+}
+
+func builtInFromEntries(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) < 1 {
+		return Null
+	}
+	r := fc.Runtime()
+	iterable, ok := args[0].(Iterable)
+	if !ok {
+		return Null
+	}
+	result := make(map[string]Value)
+	it := iterable.Iterator()
+	for {
+		entry, ok := it.Next()
+		if !ok {
+			break
+		}
+		k := objectGet(r, entry, String("key"))
+		v := objectGet(r, entry, String("value"))
+		result[k.ToString()] = v
+	}
+	return Map(result)
+}

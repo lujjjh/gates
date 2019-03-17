@@ -13,6 +13,11 @@ type _Array struct {
 	values []Value
 }
 
+type arrayIter struct {
+	i int
+	a *_Array
+}
+
 func Array(values []Value) Value {
 	return _Array{
 		values: values,
@@ -96,4 +101,17 @@ func (a _Array) Set(r *Runtime, key, value Value) {
 		return
 	}
 	a.values[i] = value
+}
+
+func (a _Array) Iterator() Iterator {
+	return &arrayIter{i: 0, a: &a}
+}
+
+func (a *arrayIter) Next() (Value, bool) {
+	i := a.i
+	if i >= 0 && i < len(a.a.values) {
+		a.i++
+		return a.a.values[i], true
+	}
+	return Null, false
 }

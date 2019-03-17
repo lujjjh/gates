@@ -22,6 +22,14 @@ type Value interface {
 	SameAs(Value) bool
 }
 
+type Iterable interface {
+	Iterator() Iterator
+}
+
+type Iterator interface {
+	Next() (value Value, ok bool)
+}
+
 func intToValue(i int64) Value {
 	if i >= -128 && i <= 127 {
 		return intCache[i+128]

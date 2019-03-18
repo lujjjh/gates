@@ -37,8 +37,8 @@ var scanTokens = [...]elt{
 	{QUO, "/"},
 	{REM, "%"},
 
-	{AND, "&"},
-	{OR, "|"},
+	{PIPE, "|"},
+
 	{XOR, "^"},
 	{SHL, "<<"},
 	{SHR, ">>"},

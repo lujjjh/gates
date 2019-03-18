@@ -193,6 +193,13 @@ func (e *compiledUnaryExpr) emitGetter() {
 }
 
 func (e *compiledBinaryExpr) emitGetter() {
+	if e.op == syntax.PIPE {
+		e.x.emitGetter()
+		e.c.emit(load(e.c.program.defineLit(Int(1))))
+		e.y.emitGetter()
+		e.c.emit(call)
+		return
+	}
 	e.x.emitGetter()
 	e.y.emitGetter()
 	switch e.op {
@@ -206,10 +213,6 @@ func (e *compiledBinaryExpr) emitGetter() {
 		e.c.emit(div)
 	case syntax.REM:
 		e.c.emit(mod)
-	case syntax.AND:
-		e.c.emit(and)
-	case syntax.OR:
-		e.c.emit(or)
 	case syntax.XOR:
 		e.c.emit(xor)
 	case syntax.SHL:

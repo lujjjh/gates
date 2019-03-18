@@ -418,9 +418,9 @@ AGAIN:
 		case '!':
 			tok = s.switch2(NOT, NEQ)
 		case '&':
-			tok = s.switch3(AND, ILLEGAL, '&', LAND)
+			tok = s.switch3(ILLEGAL, ILLEGAL, '&', LAND)
 		case '|':
-			tok = s.switch3(OR, ILLEGAL, '|', LOR)
+			tok = s.switch3(PIPE, ILLEGAL, '|', LOR)
 		default:
 			tok = ILLEGAL
 			lit = string(ch)

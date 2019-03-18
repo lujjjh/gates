@@ -24,7 +24,7 @@
     }, 0, base));
   }
 
-  assert_eq(null, reduce(function () { return 1; }, []));
+  assert_eq(null, reduce(function () { return 1; }, null, []));
 
   assert_eq(2, find(function (v) { return v % 2 == 0; }, [ 1, 2, 3, 4 ]));
   assert_eq(null, find(function (v) { return false; }, []));

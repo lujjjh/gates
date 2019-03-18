@@ -24,13 +24,15 @@ func (g *Global) initBuiltIns() {
 	g.Set("number", FunctionFunc(builtInNumber))
 	g.Set("string", FunctionFunc(builtInString))
 
-	g.Set("map", FunctionFunc(builtInMap))
-	g.Set("filter", FunctionFunc(builtInFilter))
-	g.Set("reduce", FunctionFunc(builtInReduce))
-	g.Set("find", FunctionFunc(builtInFind))
-	g.Set("find_index", FunctionFunc(builtInFindIndex))
-	g.Set("find_last", FunctionFunc(builtInFindLast))
-	g.Set("find_last_index", FunctionFunc(builtInFindLastIndex))
+	g.Set("curry", curry(FunctionFunc(builtInCurry), 2))
+
+	g.Set("map", curry(FunctionFunc(builtInMap), 2))
+	g.Set("filter", curry(FunctionFunc(builtInFilter), 2))
+	g.Set("reduce", curry(FunctionFunc(builtInReduce), 3))
+	g.Set("find", curry(FunctionFunc(builtInFind), 2))
+	g.Set("find_index", curry(FunctionFunc(builtInFindIndex), 2))
+	g.Set("find_last", curry(FunctionFunc(builtInFindLast), 2))
+	g.Set("find_last_index", curry(FunctionFunc(builtInFindLastIndex), 2))
 
 	g.Set("to_entries", FunctionFunc(builtInToEntries))
 	g.Set("from_entries", FunctionFunc(builtInFromEntries))

@@ -1,0 +1,12 @@
+(function () {
+  let add = curry(2, function (a, b) { return a + b; });
+  assert_eq(42, add(40, 2));
+  assert_eq(42, add(40)(2));
+
+  let add2 = add(2);
+  assert_eq(42, add2(40));
+  assert_eq(42, add2(40));
+
+  let ping = curry(0)(function () { return "pong"; });
+  assert_eq("pong", ping());
+})()

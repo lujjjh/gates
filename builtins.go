@@ -1,5 +1,21 @@
 package gates
 
+func curry(f Function, n int) Function {
+	return FunctionFunc(func(fc FunctionCall) Value {
+		curriedArgs := make([]Value, 0, n)
+		var curriedF Function
+		curriedF = FunctionFunc(func(fc FunctionCall) Value {
+			args := fc.Args()
+			curriedArgs = append(curriedArgs, args...)
+			if len(curriedArgs) < n {
+				return curriedF
+			}
+			return fc.Runtime().Call(f, curriedArgs...)
+		})
+		return fc.Runtime().Call(curriedF, fc.Args()...)
+	})
+}
+
 func builtInBool(fc FunctionCall) Value {
 	args := fc.Args()
 	if len(args) == 0 {
@@ -30,6 +46,15 @@ func builtInString(fc FunctionCall) Value {
 		return String("")
 	}
 	return String(args[0].ToString())
+}
+
+func builtInCurry(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) != 2 {
+		return Null
+	}
+	n, f := int(args[0].ToInt()), args[1].ToFunction()
+	return curry(f, n)
 }
 
 func builtInMap(fc FunctionCall) Value {

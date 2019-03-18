@@ -605,28 +605,6 @@ func (_mod) exec(vm *vm) {
 	vm.pc++
 }
 
-type _and struct{}
-
-var and _and
-
-func (_and) exec(vm *vm) {
-	y := vm.stack.Pop().ToInt()
-	x := vm.stack.Pop().ToInt()
-	vm.stack.Push(intToValue(x & y))
-	vm.pc++
-}
-
-type _or struct{}
-
-var or _or
-
-func (_or) exec(vm *vm) {
-	y := vm.stack.Pop().ToInt()
-	x := vm.stack.Pop().ToInt()
-	vm.stack.Push(intToValue(x | y))
-	vm.pc++
-}
-
 type _xor struct{}
 
 var xor _xor

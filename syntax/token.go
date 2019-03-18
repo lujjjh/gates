@@ -34,8 +34,8 @@ const (
 	QUO // /
 	REM // %
 
-	AND // &
-	OR  // |
+	PIPE // |
+
 	XOR // ^
 	SHL // <<
 	SHR // >>
@@ -91,8 +91,8 @@ var tokens = [...]string{
 	QUO: "/",
 	REM: "%",
 
-	AND: "&",
-	OR:  "|",
+	PIPE: "|",
+
 	XOR: "^",
 	SHL: "<<",
 	SHR: ">>",
@@ -149,8 +149,8 @@ func (tok Token) String() string {
 //
 const (
 	LowestPrec  = 0 // non-operators
-	UnaryPrec   = 6
-	HighestPrec = 7
+	UnaryPrec   = 7
+	HighestPrec = 8
 )
 
 // Precedence returns the operator precedence of the binary
@@ -159,16 +159,18 @@ const (
 //
 func (op Token) Precedence() int {
 	switch op {
-	case LOR:
+	case PIPE:
 		return 1
-	case LAND:
+	case LOR:
 		return 2
-	case EQL, NEQ, LSS, LEQ, GTR, GEQ:
+	case LAND:
 		return 3
-	case ADD, SUB, OR, XOR:
+	case EQL, NEQ, LSS, LEQ, GTR, GEQ:
 		return 4
-	case MUL, QUO, REM, SHL, SHR, AND:
+	case ADD, SUB, XOR:
 		return 5
+	case MUL, QUO, REM, SHL, SHR:
+		return 6
 	}
 	return LowestPrec
 }

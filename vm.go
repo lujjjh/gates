@@ -306,7 +306,7 @@ type _arrayConcat struct{}
 func (l _arrayConcat) exec(vm *vm) {
 	array2 := vm.stack.Pop()
 	array := vm.stack.Pop().(_Array)
-	iterable, ok := array2.(Iterable)
+	iterable, ok := GetIterable(array2)
 	if !ok {
 		goto End
 	}
@@ -360,7 +360,7 @@ type _mapConcat struct{}
 func (l _mapConcat) exec(vm *vm) {
 	m2 := vm.stack.Pop()
 	m := vm.stack.Pop().(Map)
-	iterable, ok := m2.(Iterable)
+	iterable, ok := GetIterable(m2)
 	if !ok {
 		goto End
 	}

@@ -180,7 +180,7 @@ func builtInToEntries(fc FunctionCall) Value {
 	if len(args) < 1 {
 		return Null
 	}
-	iterable, ok := args[0].(Iterable)
+	iterable, ok := GetIterable(args[0])
 	if !ok {
 		return Null
 	}
@@ -202,7 +202,7 @@ func builtInFromEntries(fc FunctionCall) Value {
 		return Null
 	}
 	r := fc.Runtime()
-	iterable, ok := args[0].(Iterable)
+	iterable, ok := GetIterable(args[0])
 	if !ok {
 		return Null
 	}

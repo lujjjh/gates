@@ -85,3 +85,8 @@ func ToValue(i interface{}) Value {
 		return Ref{i}
 	}
 }
+
+func GetIterable(v Value) (Iterable, bool) {
+	iter, ok := unref(v).(Iterable)
+	return iter, ok
+}

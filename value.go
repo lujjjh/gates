@@ -107,7 +107,7 @@ func Type(v Value) string {
 	case v.IsString():
 		return "string"
 	}
-	if t, haveTyper := v.(typer); haveTyper {
+	if t, haveTyper := unref(v).(typer); haveTyper {
 		return t.Type()
 	}
 	return ""

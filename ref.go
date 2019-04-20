@@ -8,6 +8,8 @@ type Ref struct {
 	v interface{}
 }
 
+func (Ref) Type() string { return "ref" }
+
 func (Ref) IsString() bool { return false }
 func (Ref) IsInt() bool    { return false }
 func (Ref) IsFloat() bool  { return false }

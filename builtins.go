@@ -48,6 +48,14 @@ func builtInString(fc FunctionCall) Value {
 	return String(args[0].ToString())
 }
 
+func builtInType(fc FunctionCall) Value {
+	args := fc.Args()
+	if len(args) == 0 {
+		return String("")
+	}
+	return String(Type(args[0]))
+}
+
 func builtInCurry(fc FunctionCall) Value {
 	args := fc.Args()
 	if len(args) != 2 {

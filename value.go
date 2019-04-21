@@ -98,6 +98,8 @@ type typer interface {
 // Type returns the type tag of the given value.
 func Type(v Value) string {
 	switch {
+	case v == Null:
+		return "null"
 	case v.IsBool():
 		return "bool"
 	case v.IsFloat() || v.IsInt():

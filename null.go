@@ -4,8 +4,6 @@ type _Null struct{}
 
 var Null _Null
 
-func (_Null) Type() string { return "null" }
-
 func (_Null) IsString() bool   { return false }
 func (_Null) IsInt() bool      { return false }
 func (_Null) IsFloat() bool    { return false }

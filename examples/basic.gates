@@ -114,4 +114,15 @@
     }
     return i;
   })());
+
+  // type tag
+  assert_eq("array", type([]));
+  assert_eq("bool", type(true));
+  assert_eq("function", type(function () {}));
+  assert_eq("function", type(assert_eq));
+  assert_eq("map", type({}));
+  assert_eq("null", type(null));
+  assert_eq("number", type(42));
+  assert_eq("number", type(-1.5));
+  assert_eq("string", type(""));
 })()

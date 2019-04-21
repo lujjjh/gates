@@ -90,3 +90,27 @@ func GetIterable(v Value) (Iterable, bool) {
 	iter, ok := unref(v).(Iterable)
 	return iter, ok
 }
+
+type typer interface {
+	Type() string
+}
+
+// Type returns the type tag of the given value.
+func Type(v Value) string {
+	switch {
+	case v == Null:
+		return "null"
+	case v.IsBool():
+		return "bool"
+	case v.IsFloat() || v.IsInt():
+		return "number"
+	case v.IsFunction():
+		return "function"
+	case v.IsString():
+		return "string"
+	}
+	if t, haveTyper := unref(v).(typer); haveTyper {
+		return t.Type()
+	}
+	return ""
+}

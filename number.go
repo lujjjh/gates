@@ -13,15 +13,15 @@ type Number interface {
 	number()
 }
 
-func (i Int) number()   {}
-func (f Float) number() {}
+func (Int) number()   {}
+func (Float) number() {}
 
-func (i Int) IsString() bool   { return false }
-func (i Int) IsInt() bool      { return true }
-func (i Int) IsFloat() bool    { return false }
+func (Int) IsString() bool     { return false }
+func (Int) IsInt() bool        { return true }
+func (Int) IsFloat() bool      { return false }
 func (i Int) ToNumber() Number { return i }
-func (i Int) IsBool() bool     { return false }
-func (i Int) IsFunction() bool { return false }
+func (Int) IsBool() bool       { return false }
+func (Int) IsFunction() bool   { return false }
 
 func (i Int) ToString() string      { return strconv.FormatInt(int64(i), 10) }
 func (i Int) ToInt() int64          { return int64(i) }
@@ -52,12 +52,12 @@ func (i Int) SameAs(b Value) bool {
 	return i == ib
 }
 
-func (f Float) IsString() bool   { return false }
-func (f Float) IsInt() bool      { return false }
-func (f Float) IsFloat() bool    { return true }
+func (Float) IsString() bool     { return false }
+func (Float) IsInt() bool        { return false }
+func (Float) IsFloat() bool      { return true }
 func (f Float) ToNumber() Number { return f }
-func (f Float) IsBool() bool     { return false }
-func (f Float) IsFunction() bool { return false }
+func (Float) IsBool() bool       { return false }
+func (Float) IsFunction() bool   { return false }
 
 func (f Float) ToString() string      { return strconv.FormatFloat(float64(f), 'g', -1, 64) }
 func (f Float) ToInt() int64          { return int64(f) }

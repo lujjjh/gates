@@ -7,11 +7,11 @@ var (
 
 type Bool bool
 
-func (b Bool) IsString() bool   { return false }
-func (b Bool) IsInt() bool      { return false }
-func (b Bool) IsFloat() bool    { return false }
-func (b Bool) IsBool() bool     { return true }
-func (b Bool) IsFunction() bool { return false }
+func (Bool) IsString() bool   { return false }
+func (Bool) IsInt() bool      { return false }
+func (Bool) IsFloat() bool    { return false }
+func (Bool) IsBool() bool     { return true }
+func (Bool) IsFunction() bool { return false }
 
 func (b Bool) ToString() string {
 	if bool(b) {

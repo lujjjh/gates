@@ -24,6 +24,8 @@ func Array(values []Value) Value {
 	}
 }
 
+func (_Array) Type() string { return "array" }
+
 func (_Array) IsString() bool   { return false }
 func (_Array) IsInt() bool      { return false }
 func (_Array) IsFloat() bool    { return false }

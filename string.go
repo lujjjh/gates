@@ -11,11 +11,11 @@ type _String struct{ s string }
 
 func String(s string) _String { return _String{s} }
 
-func (s _String) IsString() bool   { return true }
-func (s _String) IsInt() bool      { return false }
-func (s _String) IsFloat() bool    { return false }
-func (s _String) IsBool() bool     { return false }
-func (s _String) IsFunction() bool { return false }
+func (_String) IsString() bool   { return true }
+func (_String) IsInt() bool      { return false }
+func (_String) IsFloat() bool    { return false }
+func (_String) IsBool() bool     { return false }
+func (_String) IsFunction() bool { return false }
 
 func (s _String) ToString() string { return s.s }
 

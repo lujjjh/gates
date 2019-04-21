@@ -15,6 +15,8 @@ type mapIter struct {
 	keys []string
 }
 
+func (Map) Type() string { return "map" }
+
 func (Map) IsString() bool   { return false }
 func (Map) IsInt() bool      { return false }
 func (Map) IsFloat() bool    { return false }

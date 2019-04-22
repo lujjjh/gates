@@ -203,10 +203,42 @@ func (p *parser) parseFunctionBody() *FunctionBody {
 	}
 }
 
+func (p *parser) parseArrowFunction(paramStart, paramEnd Pos, params []*Ident) *FunctionLit {
+	f := &FunctionLit{
+		Function: paramStart,
+		ParameterList: &ParameterList{
+			Lparen: paramStart,
+			List:   params,
+			Rparen: paramEnd,
+		},
+	}
+	if p.tok == LBRACE {
+		f.Body = p.parseFunctionBody()
+	} else {
+		f.Body = &FunctionBody{
+			Lbrace: p.pos,
+		}
+		f.Body.StmtList = []Stmt{
+			&ReturnStmt{
+				Return: p.pos,
+				Result: p.parseExpr(),
+			},
+		}
+		f.Body.Rbrace = p.pos
+	}
+	return f
+}
+
 func (p *parser) parseOperand() Expr {
 	switch p.tok {
 	case IDENT:
+		paramStart := p.pos
 		x := p.parseIdent()
+		if p.tok == ARROW { // arrow function?
+			paramEnd := p.pos
+			p.next()
+			return p.parseArrowFunction(paramStart, paramEnd, []*Ident{x})
+		}
 		return x
 
 	case NUMBER, STRING, BOOL, NULL:
@@ -217,8 +249,35 @@ func (p *parser) parseOperand() Expr {
 	case LPAREN:
 		lparen := p.pos
 		p.next()
+		if p.tok == RPAREN { // arrow function?
+			rparen := p.pos
+			p.next()
+			p.expect(ARROW)
+			return p.parseArrowFunction(lparen, rparen, nil)
+		}
 		x := p.parseExpr()
+		xIdent, isIdent := x.(*Ident)
+		if isIdent && p.tok == COMMA { // arrow function?
+			p.next()
+			params := []*Ident{xIdent}
+			if p.tok != RPAREN {
+				for {
+					params = append(params, p.parseIdent())
+					if p.tok != COMMA {
+						break
+					}
+					p.next()
+				}
+			}
+			rparen := p.expect(RPAREN)
+			p.expect(ARROW)
+			return p.parseArrowFunction(lparen, rparen, params)
+		}
 		rparen := p.expect(RPAREN)
+		if p.tok == ARROW { // arrow function?
+			p.next()
+			return p.parseArrowFunction(lparen, rparen, []*Ident{xIdent})
+		}
 		return &ParenExpr{Lparen: lparen, X: x, Rparen: rparen}
 
 	case LBRACK:

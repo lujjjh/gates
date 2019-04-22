@@ -66,6 +66,10 @@ const (
 	SEMICOLON // ;
 	COLON     // :
 	operatorEnd
+
+	othersBeg
+	ARROW // =>
+	othersEnd
 )
 
 var tokens = [...]string{
@@ -122,6 +126,8 @@ var tokens = [...]string{
 	RBRACE:    "}",
 	SEMICOLON: ";",
 	COLON:     ":",
+
+	ARROW: "=>",
 }
 
 // String returns the string corresponding to the token tok.

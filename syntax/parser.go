@@ -420,6 +420,9 @@ func (p *parser) parseForStmt() Stmt {
 	if p.tok == LET {
 		initializer = p.parseLetStmt()
 	} else {
+		if p.tok != SEMICOLON {
+			initializer = p.parseSimpleStmt()
+		}
 		p.expect(SEMICOLON)
 	}
 	var test Expr

@@ -30,4 +30,10 @@
     assert(sum == 5050);
   }
 
+  {
+    let i;
+    for (i = 0; i < 100; i = i + 1) {}
+    assert(i == 100);
+  }
+
 })()

@@ -67,6 +67,8 @@ var scanTokens = [...]elt{
 	{RBRACE, "}"},
 	{SEMICOLON, ";"},
 	{COLON, ":"},
+
+	{ARROW, "=>"},
 }
 
 const whitespace = "  \t  \n\n\n" // to separate tokens

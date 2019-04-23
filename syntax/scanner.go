@@ -414,7 +414,7 @@ AGAIN:
 		case '>':
 			tok = s.switch3(GTR, GEQ, '>', SHR)
 		case '=':
-			tok = s.switch2(ASSIGN, EQL)
+			tok = s.switch3(ASSIGN, EQL, '>', ARROW)
 		case '!':
 			tok = s.switch2(NOT, NEQ)
 		case '&':

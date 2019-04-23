@@ -125,4 +125,10 @@
   assert_eq("number", type(42));
   assert_eq("number", type(-1.5));
   assert_eq("string", type(""));
+
+  // arrow function
+  assert_eq(42, (() => 42)());
+  assert_eq(42, 20 | x => x + 1 | (x) => x * 2);
+  assert_eq(42, ((x, y) => x + y)(40, 2));
+  assert_eq(42, () => { return 42; }());
 })()

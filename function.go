@@ -40,13 +40,13 @@ func (*nativeFunction) IsFloat() bool    { return false }
 func (*nativeFunction) IsBool() bool     { return false }
 func (*nativeFunction) IsFunction() bool { return true }
 
-func (*nativeFunction) ToString() string        { return "function () { [ native code ] }" }
-func (*nativeFunction) ToInt() int64            { return 0 }
-func (*nativeFunction) ToFloat() float64        { return math.NaN() }
-func (*nativeFunction) ToNumber() Number        { return Int(0) }
-func (*nativeFunction) ToBool() bool            { return true }
-func (f *nativeFunction) ToFunction() Function  { return f }
-func (f *nativeFunction) ToNative() interface{} { return f.fun }
+func (*nativeFunction) ToString() string                         { return "function () { [ native code ] }" }
+func (*nativeFunction) ToInt() int64                             { return 0 }
+func (*nativeFunction) ToFloat() float64                         { return math.NaN() }
+func (*nativeFunction) ToNumber() Number                         { return Int(0) }
+func (*nativeFunction) ToBool() bool                             { return true }
+func (f *nativeFunction) ToFunction() Function                   { return f }
+func (f *nativeFunction) ToNative(...ToNativeOption) interface{} { return f.fun }
 
 func (f *nativeFunction) Equals(other Value) bool {
 	return (interface{})(f) == (interface{})(other)
@@ -68,13 +68,13 @@ func (*literalFunction) IsFloat() bool    { return false }
 func (*literalFunction) IsBool() bool     { return false }
 func (*literalFunction) IsFunction() bool { return true }
 
-func (*literalFunction) ToString() string        { return "function () {}" }
-func (*literalFunction) ToInt() int64            { return 0 }
-func (*literalFunction) ToFloat() float64        { return math.NaN() }
-func (*literalFunction) ToNumber() Number        { return Int(0) }
-func (*literalFunction) ToBool() bool            { return true }
-func (f *literalFunction) ToFunction() Function  { return f }
-func (f *literalFunction) ToNative() interface{} { return nil }
+func (*literalFunction) ToString() string                         { return "function () {}" }
+func (*literalFunction) ToInt() int64                             { return 0 }
+func (*literalFunction) ToFloat() float64                         { return math.NaN() }
+func (*literalFunction) ToNumber() Number                         { return Int(0) }
+func (*literalFunction) ToBool() bool                             { return true }
+func (f *literalFunction) ToFunction() Function                   { return f }
+func (f *literalFunction) ToNative(...ToNativeOption) interface{} { return nil }
 
 func (f *literalFunction) Equals(other Value) bool {
 	return (interface{})(f) == (interface{})(other)

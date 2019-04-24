@@ -20,6 +20,17 @@ func TestMapToNative(t *testing.T) {
 	assert.Equal(t, map[string]interface{}(nil), Map(nil).ToNative())
 }
 
+func TestMapToNativeCircular(t *testing.T) {
+	a := map[string]Value{
+		"foo": Int(42),
+	}
+	b := Map(a)
+	a["bar"] = b
+
+	x := b.ToNative(SkipCircularReference).(map[string]interface{})
+	assert.Nil(t, x["bar"])
+}
+
 func TestMapIterator(t *testing.T) {
 	m := Map(map[string]Value{})
 	it := m.Iterator()

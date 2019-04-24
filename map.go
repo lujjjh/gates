@@ -30,22 +30,24 @@ func (m Map) ToNumber() Number   { return Float(m.ToFloat()) }
 func (Map) ToBool() bool         { return true }
 func (Map) ToFunction() Function { return _EmptyFunction }
 
-func (m Map) ToNative() interface{} {
-	return toNative(nil, m)
+func (m Map) ToNative(ops ...ToNativeOption) interface{} {
+	return toNative(nil, m, convertToNativeOption2BinaryOptions(ops))
 }
 
-func (m Map) toNative(seen map[unsafe.Pointer]interface{}) interface{} {
+func (m Map) toNative(seen map[unsafe.Pointer]interface{}, options int) interface{} {
 	if m == nil {
 		return map[string]interface{}(nil)
 	}
 	addr := unsafe.Pointer(reflect.ValueOf(m).Pointer())
-	if v, ok := seen[addr]; ok {
+	if v, ok := seen[addr]; ok && !checkToNativeOption(SkipCircularReference, options) {
 		return v
+	} else if ok {
+		return nil
 	}
 	result := make(map[string]interface{}, len(m))
 	seen[addr] = result
 	for k, v := range m {
-		result[k] = toNative(seen, v)
+		result[k] = toNative(seen, v, options)
 	}
 	return result
 }

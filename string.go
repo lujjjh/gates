@@ -41,9 +41,9 @@ func (s _String) ToNumber() Number {
 	return Float(s.ToFloat())
 }
 
-func (s _String) ToBool() bool          { return s.s != "" }
-func (s _String) ToFunction() Function  { return _EmptyFunction }
-func (s _String) ToNative() interface{} { return s.s }
+func (s _String) ToBool() bool                           { return s.s != "" }
+func (s _String) ToFunction() Function                   { return _EmptyFunction }
+func (s _String) ToNative(...ToNativeOption) interface{} { return s.s }
 
 func (s _String) Equals(other Value) bool {
 	switch {

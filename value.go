@@ -16,7 +16,7 @@ type Value interface {
 	ToBool() bool
 	ToFunction() Function
 
-	ToNative() interface{}
+	ToNative(...ToNativeOption) interface{}
 
 	Equals(Value) bool
 	SameAs(Value) bool

@@ -23,12 +23,12 @@ func (i Int) ToNumber() Number { return i }
 func (Int) IsBool() bool       { return false }
 func (Int) IsFunction() bool   { return false }
 
-func (i Int) ToString() string      { return strconv.FormatInt(int64(i), 10) }
-func (i Int) ToInt() int64          { return int64(i) }
-func (i Int) ToFloat() float64      { return float64(i) }
-func (i Int) ToBool() bool          { return int64(i) != 0 }
-func (i Int) ToFunction() Function  { return _EmptyFunction }
-func (i Int) ToNative() interface{} { return i.ToInt() }
+func (i Int) ToString() string                       { return strconv.FormatInt(int64(i), 10) }
+func (i Int) ToInt() int64                           { return int64(i) }
+func (i Int) ToFloat() float64                       { return float64(i) }
+func (i Int) ToBool() bool                           { return int64(i) != 0 }
+func (i Int) ToFunction() Function                   { return _EmptyFunction }
+func (i Int) ToNative(...ToNativeOption) interface{} { return i.ToInt() }
 
 func (i Int) Equals(other Value) bool {
 	switch {
@@ -59,12 +59,12 @@ func (f Float) ToNumber() Number { return f }
 func (Float) IsBool() bool       { return false }
 func (Float) IsFunction() bool   { return false }
 
-func (f Float) ToString() string      { return strconv.FormatFloat(float64(f), 'g', -1, 64) }
-func (f Float) ToInt() int64          { return int64(f) }
-func (f Float) ToFloat() float64      { return float64(f) }
-func (f Float) ToBool() bool          { return float64(f) != 0 && !math.IsNaN(float64(f)) }
-func (f Float) ToFunction() Function  { return _EmptyFunction }
-func (f Float) ToNative() interface{} { return f.ToFloat() }
+func (f Float) ToString() string                       { return strconv.FormatFloat(float64(f), 'g', -1, 64) }
+func (f Float) ToInt() int64                           { return int64(f) }
+func (f Float) ToFloat() float64                       { return float64(f) }
+func (f Float) ToBool() bool                           { return float64(f) != 0 && !math.IsNaN(float64(f)) }
+func (f Float) ToFunction() Function                   { return _EmptyFunction }
+func (f Float) ToNative(...ToNativeOption) interface{} { return f.ToFloat() }
 
 func (f Float) Equals(other Value) bool {
 	switch {

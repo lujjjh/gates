@@ -27,11 +27,11 @@ func (b Bool) ToInt() int64 {
 	return 0
 }
 
-func (b Bool) ToFloat() float64      { return float64(b.ToInt()) }
-func (b Bool) ToNumber() Number      { return Int(b.ToInt()) }
-func (b Bool) ToBool() bool          { return bool(b) }
-func (b Bool) ToFunction() Function  { return _EmptyFunction }
-func (b Bool) ToNative() interface{} { return b.ToBool() }
+func (b Bool) ToFloat() float64                       { return float64(b.ToInt()) }
+func (b Bool) ToNumber() Number                       { return Int(b.ToInt()) }
+func (b Bool) ToBool() bool                           { return bool(b) }
+func (b Bool) ToFunction() Function                   { return _EmptyFunction }
+func (b Bool) ToNative(...ToNativeOption) interface{} { return b.ToBool() }
 
 func (b Bool) Equals(other Value) bool {
 	if other.IsBool() {

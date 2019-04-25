@@ -46,22 +46,24 @@ func (a _Array) ToNumber() Number   { return Float(a.ToFloat()) }
 func (_Array) ToBool() bool         { return true }
 func (_Array) ToFunction() Function { return _EmptyFunction }
 
-func (a _Array) ToNative() interface{} {
-	return toNative(nil, a)
+func (a _Array) ToNative(ops ...ToNativeOption) interface{} {
+	return toNative(nil, a, convertToNativeOption2BinaryOptions(ops))
 }
 
-func (a _Array) toNative(seen map[unsafe.Pointer]interface{}) interface{} {
+func (a _Array) toNative(seen map[unsafe.Pointer]interface{}, ops int) interface{} {
 	if a.values == nil {
 		return []interface{}(nil)
 	}
 	addr := unsafe.Pointer(reflect.ValueOf(a.values).Pointer())
-	if v, ok := seen[addr]; ok {
+	if v, ok := seen[addr]; ok && !checkToNativeOption(SkipCircularReference, ops) {
 		return v
+	} else if ok {
+		return nil
 	}
 	result := make([]interface{}, len(a.values))
 	seen[addr] = result
 	for i := range a.values {
-		result[i] = toNative(seen, a.values[i])
+		result[i] = toNative(seen, a.values[i], ops)
 	}
 	return result
 }

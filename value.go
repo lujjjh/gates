@@ -1,5 +1,9 @@
 package gates
 
+import (
+	"fmt"
+)
+
 var intCache [256]Value
 
 type Value interface {
@@ -80,7 +84,7 @@ func ToValue(i interface{}) Value {
 	case map[string]Value:
 		return Map(i)
 	case []Value:
-		return Array(i)
+		return NewArray(i)
 	default:
 		return Ref{i}
 	}
@@ -89,6 +93,14 @@ func ToValue(i interface{}) Value {
 func GetIterable(v Value) (Iterable, bool) {
 	iter, ok := unref(v).(Iterable)
 	return iter, ok
+}
+
+func GetIterator(v Value) (Iterator, bool) {
+	iterable, ok := GetIterable(v)
+	if !ok {
+		return nil, false
+	}
+	return iterable.Iterator(), true
 }
 
 type typer interface {
@@ -113,4 +125,118 @@ func Type(v Value) string {
 		return t.Type()
 	}
 	return ""
+}
+
+type ErrTypeMismatch struct {
+	expected Value
+	actual   Value
+}
+
+func (e *ErrTypeMismatch) Error() string {
+	return fmt.Sprint(Type(e.expected), " expected, got ", Type(e.actual))
+}
+
+type ErrTypeNotSupported struct {
+	v interface{}
+}
+
+func (e *ErrTypeNotSupported) Error() string {
+	return fmt.Sprintf("type %T not supported", e.v)
+}
+
+func convertValue(r *Runtime, dst interface{}, src Value) error {
+	convertArray := func() (result []Value, err error) {
+		if Type(src) != Type(Array{}) {
+			return nil, &ErrTypeMismatch{
+				expected: Array{},
+				actual:   src,
+			}
+		}
+		length := objectGet(r, src, String("length")).ToInt()
+		result = make([]Value, 0, length)
+		for i := int64(0); i < length; i++ {
+			result = append(result, objectGet(r, src, Int(i)))
+		}
+		return
+	}
+
+	convertMap := func() (result map[string]Value, err error) {
+		if Type(src) != Type(Map{}) {
+			return nil, &ErrTypeMismatch{
+				expected: Map{},
+				actual:   src,
+			}
+		}
+		it, ok := GetIterator(src)
+		if !ok {
+			return nil, &ErrTypeMismatch{
+				expected: Map{},
+				actual:   src,
+			}
+		}
+		result = make(map[string]Value)
+		for {
+			elem, ok := it.Next()
+			if !ok {
+				break
+			}
+			key := objectGet(r, elem, String("key")).ToString()
+			value := objectGet(r, elem, String("value"))
+			result[key] = value
+		}
+		return
+	}
+
+	switch dst := dst.(type) {
+	case *Value:
+		*dst = src
+	case *bool:
+		*dst = src.ToBool()
+	case *Bool:
+		*dst = Bool(src.ToBool())
+	case *float64:
+		*dst = src.ToFloat()
+	case *Float:
+		*dst = Float(src.ToFloat())
+	case *int64:
+		*dst = src.ToInt()
+	case *Int:
+		*dst = Int(src.ToInt())
+	case *Callback:
+		f := src.ToFunction()
+		*dst = func(args ...Value) Value {
+			return r.Call(f, args...)
+		}
+	case *string:
+		*dst = src.ToString()
+	case *String:
+		*dst = String(src.ToString())
+	case *[]Value:
+		result, err := convertArray()
+		if err != nil {
+			return err
+		}
+		*dst = result
+	case *Array:
+		result, err := convertArray()
+		if err != nil {
+			return err
+		}
+		*dst = NewArray(result)
+	case *map[string]Value:
+		result, err := convertMap()
+		if err != nil {
+			return err
+		}
+		*dst = result
+	case *Map:
+		result, err := convertMap()
+		if err != nil {
+			return err
+		}
+		*dst = Map(result)
+	default:
+		return &ErrTypeNotSupported{v: dst}
+	}
+	return nil
 }

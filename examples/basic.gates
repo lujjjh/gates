@@ -1,5 +1,12 @@
 // a gates program is an expression
 (function () {
+  // type conversion
+  assert_eq(true, bool(1.1));
+  assert_eq(false, bool(0));
+  assert_eq(1, int(1.1));
+  assert_eq(1.1, number(1.1));
+  assert_eq("42", string(42));
+
   // truthy && falsy
   map(function (v) { assert(v); }, [ [], true, function () {}, {}, 1, -1, 1.0, -1.0, "hello world" ]);
   map(function (v) { assert(!v); }, [ false, null, 0, 0.0, 0 / 0, "" ]);

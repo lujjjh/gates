@@ -7,33 +7,31 @@ import (
 	"unicode/utf8"
 )
 
-type _String struct{ s string }
+type String string
 
-func String(s string) _String { return _String{s} }
+func (String) IsString() bool   { return true }
+func (String) IsInt() bool      { return false }
+func (String) IsFloat() bool    { return false }
+func (String) IsBool() bool     { return false }
+func (String) IsFunction() bool { return false }
 
-func (_String) IsString() bool   { return true }
-func (_String) IsInt() bool      { return false }
-func (_String) IsFloat() bool    { return false }
-func (_String) IsBool() bool     { return false }
-func (_String) IsFunction() bool { return false }
+func (s String) ToString() string { return string(s) }
 
-func (s _String) ToString() string { return s.s }
-
-func (s _String) ToInt() int64 {
-	i, _ := strconv.ParseInt(s.s, 0, 64)
+func (s String) ToInt() int64 {
+	i, _ := strconv.ParseInt(string(s), 0, 64)
 	return i
 }
 
-func (s _String) ToFloat() float64 {
-	f, err := strconv.ParseFloat(s.s, 64)
+func (s String) ToFloat() float64 {
+	f, err := strconv.ParseFloat(string(s), 64)
 	if err != nil {
 		return math.NaN()
 	}
 	return f
 }
 
-func (s _String) ToNumber() Number {
-	t := strings.TrimSpace(s.s)
+func (s String) ToNumber() Number {
+	t := strings.TrimSpace(string(s))
 	i, err := strconv.ParseInt(t, 0, 64)
 	if err == nil {
 		return Int(i)
@@ -41,11 +39,11 @@ func (s _String) ToNumber() Number {
 	return Float(s.ToFloat())
 }
 
-func (s _String) ToBool() bool                           { return s.s != "" }
-func (s _String) ToFunction() Function                   { return _EmptyFunction }
-func (s _String) ToNative(...ToNativeOption) interface{} { return s.s }
+func (s String) ToBool() bool                           { return string(s) != "" }
+func (s String) ToFunction() Function                   { return _EmptyFunction }
+func (s String) ToNative(...ToNativeOption) interface{} { return string(s) }
 
-func (s _String) Equals(other Value) bool {
+func (s String) Equals(other Value) bool {
 	switch {
 	case other.IsString():
 		return s.SameAs(other)
@@ -56,15 +54,15 @@ func (s _String) Equals(other Value) bool {
 	}
 }
 
-func (s _String) SameAs(b Value) bool {
-	bs, ok := b.(_String)
+func (s String) SameAs(b Value) bool {
+	bs, ok := b.(String)
 	if !ok {
 		return false
 	}
-	return bs.s == s.s
+	return string(bs) == string(s)
 }
 
-func (s _String) Get(r *Runtime, key Value) Value {
+func (s String) Get(r *Runtime, key Value) Value {
 	switch {
 	case key.IsInt():
 		index := int(key.ToInt())
@@ -73,23 +71,23 @@ func (s _String) Get(r *Runtime, key Value) Value {
 		}
 		i := 0
 		start := -1
-		for j := range s.s {
+		for j := range string(s) {
 			if i == index {
 				start = j
 			}
 			if i == index+1 {
-				return String(string(s.s[start:j]))
+				return String(string(s)[start:j])
 			}
 			i++
 		}
 		if start == -1 {
 			return Null
 		}
-		return String(string(s.s[start:]))
+		return String(string(s)[start:])
 	case key.IsString():
 		switch key.ToString() {
 		case "length":
-			return Int(int64(utf8.RuneCountInString(string(s.s))))
+			return Int(int64(utf8.RuneCountInString(string(s))))
 		}
 	}
 

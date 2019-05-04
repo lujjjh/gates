@@ -7,50 +7,48 @@ import (
 	"unsafe"
 )
 
-var sharedRuntime Runtime
-
-type _Array struct {
+type Array struct {
 	values []Value
 }
 
 type arrayIter struct {
 	i int
-	a *_Array
+	a *Array
 }
 
-func Array(values []Value) Value {
-	return _Array{
+func NewArray(values []Value) Array {
+	return Array{
 		values: values,
 	}
 }
 
-func (_Array) Type() string { return "array" }
+func (Array) Type() string { return "array" }
 
-func (_Array) IsString() bool   { return false }
-func (_Array) IsInt() bool      { return false }
-func (_Array) IsFloat() bool    { return false }
-func (_Array) IsBool() bool     { return false }
-func (_Array) IsFunction() bool { return false }
+func (Array) IsString() bool   { return false }
+func (Array) IsInt() bool      { return false }
+func (Array) IsFloat() bool    { return false }
+func (Array) IsBool() bool     { return false }
+func (Array) IsFunction() bool { return false }
 
-func (a _Array) ToString() string {
+func (a Array) ToString() string {
 	stringSl := make([]string, 0, len(a.values))
 	for _, v := range a.values {
-		stringSl = append(stringSl, sharedRuntime.ToValue(v).ToString())
+		stringSl = append(stringSl, ToValue(v).ToString())
 	}
 	return strings.Join(stringSl, ",")
 }
 
-func (_Array) ToInt() int64         { return 0 }
-func (_Array) ToFloat() float64     { return math.NaN() }
-func (a _Array) ToNumber() Number   { return Float(a.ToFloat()) }
-func (_Array) ToBool() bool         { return true }
-func (_Array) ToFunction() Function { return _EmptyFunction }
+func (Array) ToInt() int64         { return 0 }
+func (Array) ToFloat() float64     { return math.NaN() }
+func (a Array) ToNumber() Number   { return Float(a.ToFloat()) }
+func (Array) ToBool() bool         { return true }
+func (Array) ToFunction() Function { return _EmptyFunction }
 
-func (a _Array) ToNative(ops ...ToNativeOption) interface{} {
+func (a Array) ToNative(ops ...ToNativeOption) interface{} {
 	return toNative(nil, a, convertToNativeOption2BinaryOptions(ops))
 }
 
-func (a _Array) toNative(seen map[unsafe.Pointer]interface{}, ops int) interface{} {
+func (a Array) toNative(seen map[unsafe.Pointer]interface{}, ops int) interface{} {
 	if a.values == nil {
 		return []interface{}(nil)
 	}
@@ -68,17 +66,17 @@ func (a _Array) toNative(seen map[unsafe.Pointer]interface{}, ops int) interface
 	return result
 }
 
-func (a _Array) Equals(other Value) bool {
-	o, ok := other.(_Array)
+func (a Array) Equals(other Value) bool {
+	o, ok := other.(Array)
 	if !ok {
 		return false
 	}
 	return reflect.DeepEqual(a.values, o.values)
 }
 
-func (a _Array) SameAs(other Value) bool { return false }
+func (a Array) SameAs(other Value) bool { return false }
 
-func (a _Array) Get(r *Runtime, key Value) Value {
+func (a Array) Get(r *Runtime, key Value) Value {
 	i := key.ToNumber()
 	if i.IsInt() {
 		ii := i.ToInt()
@@ -96,7 +94,7 @@ func (a _Array) Get(r *Runtime, key Value) Value {
 	return Null
 }
 
-func (a _Array) Set(r *Runtime, key, value Value) {
+func (a Array) Set(r *Runtime, key, value Value) {
 	if !key.IsInt() {
 		return
 	}
@@ -107,7 +105,7 @@ func (a _Array) Set(r *Runtime, key, value Value) {
 	a.values[i] = value
 }
 
-func (a _Array) Iterator() Iterator {
+func (a Array) Iterator() Iterator {
 	return &arrayIter{i: 0, a: &a}
 }
 
@@ -120,6 +118,6 @@ func (a *arrayIter) Next() (Value, bool) {
 	return Null, false
 }
 
-func (a *_Array) push(value Value) {
+func (a *Array) push(value Value) {
 	a.values = append(a.values, value)
 }

@@ -109,7 +109,7 @@ func (s packageStrings) split(fc FunctionCall) Value {
 	if len(args) == 0 {
 		return Null
 	} else if len(args) == 1 {
-		return Array([]Value{args[0]})
+		return NewArray([]Value{args[0]})
 	}
 
 	values := strings.Split(args[0].ToString(), args[1].ToString())
@@ -117,7 +117,7 @@ func (s packageStrings) split(fc FunctionCall) Value {
 	for i, value := range values {
 		result[i] = String(value)
 	}
-	return Array(result)
+	return NewArray(result)
 }
 
 func (s packageStrings) join(fc FunctionCall) Value {
@@ -220,7 +220,7 @@ func (packageStrings) findAll(fc FunctionCall) Value {
 	for i, value := range results {
 		result[i] = String(value)
 	}
-	return Array(result)
+	return NewArray(result)
 }
 
 func (packageStrings) contains(fc FunctionCall) Value {

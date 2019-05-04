@@ -68,7 +68,7 @@ func (r *Runtime) init() {
 	r.vm = &vm{r: r}
 	r.vm.init()
 	r.global = NewGlobal()
-	r.global.initBuiltIns()
+	r.global.initBuiltInFunctions()
 
 	initPackageStrings(r)
 }

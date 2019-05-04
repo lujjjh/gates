@@ -283,7 +283,7 @@ type newArray uint
 func (l newArray) exec(vm *vm) {
 	values := make([]Value, l)
 	copy(values, vm.stack.PopN(int(l)))
-	vm.stack.Push(Array(values))
+	vm.stack.Push(NewArray(values))
 	vm.pc++
 }
 
@@ -293,7 +293,7 @@ type _arrayPush struct{}
 
 func (l _arrayPush) exec(vm *vm) {
 	value := vm.stack.Pop()
-	array := vm.stack.Pop().(_Array)
+	array := vm.stack.Pop().(Array)
 	array.push(value)
 	vm.stack.Push(array)
 	vm.pc++
@@ -305,7 +305,7 @@ type _arrayConcat struct{}
 
 func (l _arrayConcat) exec(vm *vm) {
 	array2 := vm.stack.Pop()
-	array := vm.stack.Pop().(_Array)
+	array := vm.stack.Pop().(Array)
 	iterable, ok := GetIterable(array2)
 	if !ok {
 		goto End

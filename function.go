@@ -1,8 +1,11 @@
 package gates
 
 import (
+	"fmt"
 	"math"
 )
+
+type Callback func(...Value) Value
 
 type Function interface {
 	Value
@@ -81,3 +84,57 @@ func (f *literalFunction) Equals(other Value) bool {
 }
 
 func (f *literalFunction) SameAs(other Value) bool { return f.Equals(other) }
+
+type ErrTooFewArguments struct {
+	expected int
+	actual   int
+}
+
+func (e *ErrTooFewArguments) Error() string {
+	return fmt.Sprintln(e.expected, "arguments expected, got", e.actual)
+}
+
+type ErrWithArgumentIndex struct {
+	Err   error
+	index int
+}
+
+func (e *ErrWithArgumentIndex) Error() string {
+	return fmt.Sprint("argument #", e.index, ": ", e.Err.Error())
+}
+
+type ArgumentScanner struct {
+	fc     FunctionCall
+	offset int
+}
+
+func NewArgumentScanner(fc FunctionCall) *ArgumentScanner {
+	return &ArgumentScanner{
+		fc: fc,
+	}
+}
+
+func (s *ArgumentScanner) Scan(values ...interface{}) error {
+	args := s.fc.Args()[s.offset:]
+	argc := len(args)
+	if argc < len(values) {
+		return &ErrTooFewArguments{
+			expected: s.offset + argc,
+			actual:   s.offset + len(values),
+		}
+	}
+	r := s.fc.Runtime()
+	for i := range values {
+		dst := values[i]
+		src := args[i]
+		err := convertValue(r, dst, src)
+		if err != nil {
+			return &ErrWithArgumentIndex{
+				Err:   err,
+				index: s.offset,
+			}
+		}
+		s.offset++
+	}
+	return nil
+}

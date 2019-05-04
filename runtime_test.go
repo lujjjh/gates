@@ -61,7 +61,7 @@ func TestRunString(t *testing.T) {
 	}))
 
 	assertValue(t, Int(42), mustRunStringWithGlobal(`a[1*2]`, map[string]Value{
-		"a": Array([]Value{Int(40), Int(41), Int(42)}),
+		"a": NewArray([]Value{Int(40), Int(41), Int(42)}),
 	}))
 
 	assertValue(t, Int(4), mustRunString(`("he" + "he").length`))

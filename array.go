@@ -22,6 +22,14 @@ func NewArray(values []Value) Array {
 	}
 }
 
+func NewArrayFromStringSlice(a []string) Array {
+	values := make([]Value, len(a))
+	for i := range a {
+		values[i] = String(a[i])
+	}
+	return NewArray(values)
+}
+
 func (Array) Type() string { return "array" }
 
 func (Array) IsString() bool   { return false }

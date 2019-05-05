@@ -70,7 +70,7 @@ func (r *Runtime) init() {
 	r.global = NewGlobal()
 	r.global.initBuiltInFunctions()
 
-	initPackageStrings(r)
+	r.global.Set("strings", packageStrings())
 }
 
 func (r *Runtime) Global() *Global {

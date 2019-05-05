@@ -185,7 +185,7 @@ func TestRunExamples(t *testing.T) {
 			return True
 		})
 		g.Set("assert", _assert)
-		g.Set("assert_eq", FunctionFunc(func(fc FunctionCall) Value {
+		g.Set("assert_eq", CurriedFunctionFunc(2, func(fc FunctionCall) Value {
 			args := fc.Args()
 			argc := len(args)
 			if argc < 2 {
@@ -194,7 +194,7 @@ func TestRunExamples(t *testing.T) {
 			message := String(args[0].ToString() + " expected, got " + args[1].ToString())
 			return r.Call(_assert, Bool(args[0].Equals(args[1])), message)
 		}))
-		g.Set("assert_ne", FunctionFunc(func(fc FunctionCall) Value {
+		g.Set("assert_ne", CurriedFunctionFunc(2, func(fc FunctionCall) Value {
 			args := fc.Args()
 			argc := len(args)
 			if argc < 2 {

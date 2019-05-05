@@ -1,0 +1,70 @@
+[
+  // has_prefix
+  () => strings.has_prefix("foobar", "foo") | assert_eq(true),
+  () => strings.has_prefix("foobar", "bar") | assert_eq(false),
+
+  // has_suffix
+  () => strings.has_suffix("foobar", "bar") | assert_eq(true),
+  () => strings.has_suffix("foobar", "foo") | assert_eq(false),
+
+  // to_lower
+  () => strings.to_lower("Foo_Bar") | assert_eq("foo_bar"),
+  () => strings.to_lower("foo_bar1234") | assert_eq("foo_bar1234"),
+
+  // to_upper
+  () => strings.to_upper("Foo_Bar") | assert_eq("FOO_BAR"),
+  () => strings.to_upper("FOO_BAR1234") | assert_eq("FOO_BAR1234"),
+
+  // trim
+  () => strings.trim("foo__foo", "foo") | assert_eq("__"),
+  () => strings.trim(" foo \t\v") | assert_eq("foo"),
+
+  // trim_left
+  () => strings.trim_left("foo__foo", "foo") | assert_eq("__foo"),
+  () => strings.trim_left(" foo \t\v") | assert_eq("foo \t\v"),
+
+  // trim_right
+  () => strings.trim_right("foo__foo", "foo") | assert_eq("foo__"),
+  () => strings.trim_right(" foo \t\v") | assert_eq(" foo"),
+
+  // split
+  () => strings.split("1,2", ",") | assert_eq([ "1", "2" ]),
+
+  // join
+  () => strings.join([ "1", 2 ], ",") | assert_eq("1,2"),
+
+  // match
+  () => strings.match("(?P<first_name>\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group(1) | assert_eq("Malcolm"),
+  () => strings.match("(?P<first_name>\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group("first_name") | assert_eq("Malcolm"),
+  () => strings.match("(\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group("first_name") | assert_eq(null),
+  () => strings.match("(\\w+) (?P<last_name>\\w+)", "Malcolm Reynolds").group(-1) | assert_eq(null),
+  () => strings.match("(?i)test", "Test") | assert_ne(null),
+
+  // find_all
+  () => strings.find_all("(?i)(foo)", "foo\nfOo\nFOO") | assert_eq([ "foo", "fOo", "FOO" ]),
+
+  // contains
+  () => strings.contains("foobarfoo", "foo") | assert_eq(true),
+  () => strings.contains("foobarfoo", "abc") | assert_eq(false),
+
+  // index
+  () => strings.index("foobarfoo", "foo") | assert_eq(0),
+  () => strings.index("foobarfoo", "rba") | assert_eq(-1),
+
+  // index_any
+  () => strings.index_any("barfoo", "aroo") | assert_eq(1),
+  () => strings.index_any("barfoo", "ttt") | assert_eq(-1),
+
+  // last_index
+  () => strings.last_index("foobarfoo", "foo") | assert_eq(6),
+  () => strings.last_index("foobarfoo", "baz") | assert_eq(-1),
+
+  // last_index_any
+  () => strings.last_index_any("foobarfoo", "fo") | assert_eq(8),
+  () => strings.last_index("foobarfoo", "tu") | assert_eq(-1),
+
+  // repeat
+  () => strings.repeat("foo", 5) | assert_eq("foofoofoofoofoo"),
+
+  () => "placeholder"
+] | map(f => f())

@@ -3,6 +3,7 @@ package gates
 import (
 	"regexp"
 	"strings"
+	"unicode"
 )
 
 type packageStrings struct {
@@ -89,7 +90,7 @@ func (s packageStrings) trimLeft(fc FunctionCall) Value {
 	if len(args) == 0 {
 		return Null
 	} else if len(args) == 1 {
-		return args[0]
+		return String(strings.TrimLeftFunc(args[0].ToString(), unicode.IsSpace))
 	}
 	return String(strings.TrimLeft(args[0].ToString(), args[1].ToString()))
 }
@@ -99,7 +100,7 @@ func (s packageStrings) trimRight(fc FunctionCall) Value {
 	if len(args) == 0 {
 		return Null
 	} else if len(args) == 1 {
-		return args[0]
+		return String(strings.TrimRightFunc(args[0].ToString(), unicode.IsSpace))
 	}
 	return String(strings.TrimRight(args[0].ToString(), args[1].ToString()))
 }

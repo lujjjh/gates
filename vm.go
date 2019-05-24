@@ -26,7 +26,10 @@ type ctx struct {
 	pc, bp  int
 }
 
-var ErrStackOverflow = errors.New("stack overflow")
+var (
+	ErrStackOverflow       = errors.New("stack overflow")
+	ErrCyclesLimitExceeded = errors.New("cycles limit exceeded")
+)
 
 func (v *valueStack) init() {
 	v.l = v.l[:0]
@@ -106,6 +109,8 @@ type vm struct {
 	callStack []ctx
 	bp        int
 	program   *Program
+
+	cyclesLimit int
 }
 
 func (vm *vm) newStash() {
@@ -136,11 +141,18 @@ func (vm *vm) run() (err error) {
 
 	vm.halt = false
 	ctx := vm.ctx
+	remainingCycles := vm.cyclesLimit
+
 	for !vm.halt {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
+			if remainingCycles > 0 {
+				if remainingCycles--; remainingCycles == 0 {
+					return ErrCyclesLimitExceeded
+				}
+			}
 		}
 		vm.program.code[vm.pc].exec(vm)
 	}

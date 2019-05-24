@@ -77,6 +77,10 @@ func (r *Runtime) Global() *Global {
 	return r.global
 }
 
+func (r *Runtime) SetCyclesLimit(max int) {
+	r.vm.cyclesLimit = max
+}
+
 func (r *Runtime) RunProgram(ctx context.Context, program *Program) (Value, error) {
 	r.vm.program = program
 	r.vm.pc = 0

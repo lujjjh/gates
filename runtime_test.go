@@ -210,6 +210,35 @@ func TestRunExamples(t *testing.T) {
 	}
 }
 
+func TestExceedInstructionLimit(t *testing.T) {
+	src := `
+	(function (x) {
+		return function (f) {
+			return function () {
+				return f(x(x)(f))();
+			};
+		};
+	})(function (x) {
+		return function (f) {
+			return function () {
+				return f(x(x)(f))();
+			};
+		};
+	})(function (f) {
+		return function () {
+			return f();
+		};
+	})()
+`
+
+	r := New()
+	r.SetCyclesLimit(5)
+	_, err := r.RunString(src)
+	if err != ErrCyclesLimitExceeded {
+		t.Errorf("cycles limit exceeded expected")
+	}
+}
+
 func BenchmarkRunProgram(b *testing.B) {
 	program, err := Compile(`"hello"[0] + 1 && false`)
 	if err != nil {

@@ -18,3 +18,7 @@ func (p *Program) defineLit(v Value) uint {
 	p.values = append(p.values, v)
 	return index
 }
+
+func (p *Program) InstructionNumber() int {
+	return len(p.code)
+}

@@ -146,6 +146,9 @@ func (e *ErrTypeNotSupported) Error() string {
 
 func convertValue(r *Runtime, dst interface{}, src Value) error {
 	convertArray := func() (result []Value, err error) {
+		if src == Null {
+			return nil, nil
+		}
 		if Type(src) != Type(Array{}) {
 			return nil, &ErrTypeMismatch{
 				expected: Array{},
@@ -161,6 +164,9 @@ func convertValue(r *Runtime, dst interface{}, src Value) error {
 	}
 
 	convertMap := func() (result map[string]Value, err error) {
+		if src == Null {
+			return nil, nil
+		}
 		if Type(src) != Type(Map{}) {
 			return nil, &ErrTypeMismatch{
 				expected: Map{},

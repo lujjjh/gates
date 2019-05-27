@@ -34,4 +34,6 @@
   assert_eq(-1, find_index(function (v) { return false; }, []));
   assert_eq(3, find_last_index(function (v) { return v % 2 == 0; }, [ 1, 2, 3, 4 ]));
   assert_eq(-1, find_last_index(function (v) { return false; }, []));
+
+  assert_eq([], null | map(() => {}));
 })()

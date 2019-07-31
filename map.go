@@ -49,6 +49,7 @@ func (m Map) toNative(seen map[unsafe.Pointer]interface{}, options int) interfac
 	for k, v := range m {
 		result[k] = toNative(seen, v, options)
 	}
+	delete(seen, addr)
 	return result
 }
 

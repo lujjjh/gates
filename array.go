@@ -71,6 +71,7 @@ func (a Array) toNative(seen map[unsafe.Pointer]interface{}, ops int) interface{
 	for i := range a.values {
 		result[i] = toNative(seen, a.values[i], ops)
 	}
+	delete(seen, addr)
 	return result
 }
 

@@ -2,6 +2,7 @@ package gates
 
 import (
 	"context"
+	"github.com/gates/gates/objects"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -53,7 +54,7 @@ func TestRunString(t *testing.T) {
 	assertValue(t, String("hehe"), mustRunString(`null + "hehe"`))
 
 	assertValue(t, Int(42), mustRunStringWithGlobal(`a.b["c"]`, map[string]Value{
-		"a": ref(getterFunc(func(r *Runtime, v Value) Value {
+		"a": objects.ref(objects.getterFunc(func(r *Runtime, v Value) Value {
 			return Map(map[string]Value{
 				"c": Int(42),
 			})

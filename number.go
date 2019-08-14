@@ -37,7 +37,7 @@ func (i Int) Equals(other Value) bool {
 	case other.IsFloat():
 		return i.ToFloat() == other.ToFloat()
 	case other.IsString():
-		return other.ToNumber().Equals(i)
+		return other.Equals(i)
 	case other.IsBool():
 		return i.ToInt() == other.ToInt()
 	}
@@ -73,7 +73,7 @@ func (f Float) Equals(other Value) bool {
 	case other.IsFloat():
 		return f.ToFloat() == other.ToFloat()
 	case other.IsString():
-		return other.ToNumber().Equals(f)
+		return other.Equals(f)
 	case other.IsBool():
 		return f.ToInt() == other.ToInt()
 	default:

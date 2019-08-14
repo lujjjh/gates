@@ -64,10 +64,7 @@ func (m Map) Equals(other Value) bool {
 func (m Map) SameAs(other Value) bool { return false }
 
 func (m Map) Get(r *Runtime, key Value) Value {
-	if m == nil {
-		return Null
-	}
-	return r.ToValue(m[key.ToString()])
+	return ToValue(m[key.ToString()])
 }
 
 func (m Map) Set(r *Runtime, key, value Value) {

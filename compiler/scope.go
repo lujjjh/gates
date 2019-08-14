@@ -1,4 +1,4 @@
-package gates
+package compiler
 
 type scope struct {
 	names   map[string]uint32

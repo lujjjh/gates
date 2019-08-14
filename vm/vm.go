@@ -1,16 +1,20 @@
 package vm
 
 import (
+	"errors"
 	"fmt"
+	"github.com/gates/gates"
 	"math"
 	"strings"
-
-	"github.com/gates/gates"
 )
 
 const (
 	StackSize = 4096
 	MaxFrames = 1024
+)
+
+var (
+	ErrStackOverflow = errors.New("stack overflow")
 )
 
 type VM struct {
@@ -56,7 +60,7 @@ func (v *VM) run() {
 	defer func() {
 		if r := recover(); r != nil {
 			if v.sp < 0 || v.sp >= StackSize {
-				v.err = gates.ErrStackOverflow
+				v.err = ErrStackOverflow
 				return
 			}
 
@@ -98,20 +102,85 @@ func (v *VM) run() {
 		case OpLoadLocal:
 			v.ip++
 			idx := int(v.curInsts[v.ip])
-
 			val := v.stack[v.curFrame.bp+idx]
-
 			v.stack[v.sp] = val
 			v.sp++
 
 		case OpStoreLocal:
 			v.ip++
 			idx := int(v.curInsts[v.ip])
-
 			val := v.stack[v.sp-1]
 			v.sp--
-
 			v.stack[v.curFrame.bp+idx] = val
+
+		case OpArray:
+			v.ip += 2
+			size := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
+			result := make([]gates.Value, size)
+			if size > 0 {
+				copy(result, v.stack[v.sp-size:v.sp])
+			}
+			v.sp -= size
+			v.stack[v.sp] = gates.NewArray(result)
+			v.sp++
+
+		case OpMergeArray:
+			v.ip++
+			numSegments := int(v.curInsts[v.ip])
+			result := make([]gates.Value, 0)
+			for _, iterable := range v.stack[v.sp-numSegments : v.sp] {
+				it, ok := gates.GetIterator(iterable)
+				if !ok {
+					continue
+				}
+				for {
+					value, ok := it.Next()
+					if !ok {
+						break
+					}
+					result = append(result, value)
+				}
+			}
+			v.sp -= numSegments
+			v.stack[v.sp] = gates.NewArray(result)
+			v.sp++
+
+		case OpMap:
+			v.ip += 2
+			size := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
+			result := make(gates.Map, size)
+			offset := size * 2
+			for i := v.sp - offset; i < v.sp; i += 2 {
+				key := v.stack[i].ToString()
+				value := v.stack[i+1]
+				result[key] = value
+			}
+			v.sp -= offset
+			v.stack[v.sp] = result
+			v.sp++
+
+		case OpMergeMap:
+			v.ip++
+			numSegments := int(v.curInsts[v.ip])
+			result := make(gates.Map)
+			for _, iterable := range v.stack[v.sp-numSegments : v.sp] {
+				it, ok := gates.GetIterator(iterable)
+				if !ok {
+					continue
+				}
+				for {
+					base, ok := it.Next()
+					if !ok {
+						break
+					}
+					key := gates.ObjectGet(nil, base, gates.String("key")).ToString()
+					value := gates.ObjectGet(nil, base, gates.String("value"))
+					result[key] = value
+				}
+			}
+			v.sp -= numSegments
+			v.stack[v.sp] = result
+			v.sp++
 
 		case OpUnaryPlus:
 			v.stack[v.sp-1] = v.stack[v.sp-1].ToNumber()

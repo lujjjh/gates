@@ -1,19 +1,27 @@
 package syntax
 
+type Node interface {
+	node()
+}
+
 type Expr interface {
+	Node
 	exprNode()
 }
 
 type expr struct{}
 
+func (expr) node()     {}
 func (expr) exprNode() {}
 
 type Stmt interface {
+	Node
 	stmtNode()
 }
 
 type stmt struct{}
 
+func (stmt) node()     {}
 func (stmt) stmtNode() {}
 
 type (

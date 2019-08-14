@@ -8,7 +8,7 @@ import (
 )
 
 type Array struct {
-	values []Value
+	Values []Value
 }
 
 type arrayIter struct {
@@ -18,7 +18,7 @@ type arrayIter struct {
 
 func NewArray(values []Value) Array {
 	return Array{
-		values: values,
+		Values: values,
 	}
 }
 
@@ -39,9 +39,9 @@ func (Array) IsBool() bool     { return false }
 func (Array) IsFunction() bool { return false }
 
 func (a Array) ToString() string {
-	stringSl := make([]string, 0, len(a.values))
-	for _, v := range a.values {
-		stringSl = append(stringSl, ToValue(v).ToString())
+	stringSl := make([]string, 0, len(a.Values))
+	for _, v := range a.Values {
+		stringSl = append(stringSl, v.ToString())
 	}
 	return strings.Join(stringSl, ",")
 }
@@ -57,19 +57,19 @@ func (a Array) ToNative(ops ...ToNativeOption) interface{} {
 }
 
 func (a Array) toNative(seen map[unsafe.Pointer]interface{}, ops int) interface{} {
-	if a.values == nil {
+	if a.Values == nil {
 		return []interface{}(nil)
 	}
-	addr := unsafe.Pointer(reflect.ValueOf(a.values).Pointer())
+	addr := unsafe.Pointer(reflect.ValueOf(a.Values).Pointer())
 	if v, ok := seen[addr]; ok && !checkToNativeOption(SkipCircularReference, ops) {
 		return v
 	} else if ok {
 		return nil
 	}
-	result := make([]interface{}, len(a.values))
+	result := make([]interface{}, len(a.Values))
 	seen[addr] = result
-	for i := range a.values {
-		result[i] = toNative(seen, a.values[i], ops)
+	for i := range a.Values {
+		result[i] = toNative(seen, a.Values[i], ops)
 	}
 	delete(seen, addr)
 	return result
@@ -80,24 +80,23 @@ func (a Array) Equals(other Value) bool {
 	if !ok {
 		return false
 	}
-	return reflect.DeepEqual(a.values, o.values)
+	return reflect.DeepEqual(a.Values, o.Values)
 }
 
 func (a Array) SameAs(other Value) bool { return false }
 
 func (a Array) Get(r *Runtime, key Value) Value {
-	i := key.ToNumber()
-	if i.IsInt() {
-		ii := i.ToInt()
-		if ii < 0 || ii >= int64(len(a.values)) {
+	if key.IsInt() {
+		i := key.ToInt()
+		if i < 0 || i >= int64(len(a.Values)) {
 			return Null
 		}
-		return a.values[ii]
+		return a.Values[i]
 	}
 
 	switch key.ToString() {
 	case "length":
-		return Int(len(a.values))
+		return Int(len(a.Values))
 	}
 
 	return Null
@@ -108,10 +107,10 @@ func (a Array) Set(r *Runtime, key, value Value) {
 		return
 	}
 	i := key.ToInt()
-	if i < 0 || i >= int64(len(a.values)) {
+	if i < 0 || i >= int64(len(a.Values)) {
 		return
 	}
-	a.values[i] = value
+	a.Values[i] = value
 }
 
 func (a Array) Iterator() Iterator {
@@ -120,13 +119,13 @@ func (a Array) Iterator() Iterator {
 
 func (a *arrayIter) Next() (Value, bool) {
 	i := a.i
-	if i >= 0 && i < len(a.a.values) {
+	if i >= 0 && i < len(a.a.Values) {
 		a.i++
-		return a.a.values[i], true
+		return a.a.Values[i], true
 	}
 	return Null, false
 }
 
 func (a *Array) push(value Value) {
-	a.values = append(a.values, value)
+	a.Values = append(a.Values, value)
 }

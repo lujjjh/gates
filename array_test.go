@@ -12,12 +12,12 @@ func TestArrayToNative(t *testing.T) {
 	a[0] = b
 	a[2] = b
 
-	x := b.ToNative().([]interface{})
+	x := ToNative().([]interface{})
 	assert.Equal(t, x, x[0])
 	assert.Equal(t, int64(1), x[1])
 	assert.Equal(t, x, x[2])
 
-	assert.Equal(t, []interface{}(nil), NewArray(nil).ToNative())
+	assert.Equal(t, []interface{}(nil), ToNative())
 }
 
 func TestArrayToNativeCircular(t *testing.T) {
@@ -28,8 +28,8 @@ func TestArrayToNativeCircular(t *testing.T) {
 	a[0] = b
 	a[2] = b
 
-	x := b.ToNative(SkipCircularReference).([]interface{})
-	assert.EqualValues(5, len(x))
+	x := ToNative(SkipCircularReference).([]interface{})
+	assert.EqualValues(3, len(x))
 	assert.Nil(x[0])
 	assert.EqualValues(1, x[1])
 	assert.Nil(x[2])
@@ -39,20 +39,20 @@ func TestArrayToNativeCircular(t *testing.T) {
 
 func TestArrayIterator(t *testing.T) {
 	a := NewArray([]Value{})
-	it := a.Iterator()
-	value, ok := it.Next()
+	it := Iterator()
+	value, ok := Next()
 	assert.Equal(t, Null, value)
 	assert.False(t, ok)
 
 	a = NewArray([]Value{Int(42), String("foo")})
-	it = a.Iterator()
-	value, ok = it.Next()
+	it = Iterator()
+	value, ok = Next()
 	assert.Equal(t, Int(42), value)
 	assert.True(t, ok)
-	value, ok = it.Next()
+	value, ok = Next()
 	assert.Equal(t, String("foo"), value)
 	assert.True(t, ok)
-	value, ok = it.Next()
+	value, ok = Next()
 	assert.Equal(t, Null, value)
 	assert.False(t, ok)
 }

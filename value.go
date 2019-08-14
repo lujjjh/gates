@@ -155,10 +155,10 @@ func convertValue(r *Runtime, dst interface{}, src Value) error {
 				actual:   src,
 			}
 		}
-		length := objectGet(r, src, String("length")).ToInt()
+		length := ObjectGet(r, src, String("length")).ToInt()
 		result = make([]Value, 0, length)
 		for i := int64(0); i < length; i++ {
-			result = append(result, objectGet(r, src, Int(i)))
+			result = append(result, ObjectGet(r, src, Int(i)))
 		}
 		return
 	}
@@ -186,8 +186,8 @@ func convertValue(r *Runtime, dst interface{}, src Value) error {
 			if !ok {
 				break
 			}
-			key := objectGet(r, elem, String("key")).ToString()
-			value := objectGet(r, elem, String("value"))
+			key := ObjectGet(r, elem, String("key")).ToString()
+			value := ObjectGet(r, elem, String("value"))
 			result[key] = value
 		}
 		return
@@ -208,11 +208,11 @@ func convertValue(r *Runtime, dst interface{}, src Value) error {
 		*dst = src.ToInt()
 	case *Int:
 		*dst = Int(src.ToInt())
-	case *Callback:
-		f := src.ToFunction()
-		*dst = func(args ...Value) Value {
-			return r.Call(f, args...)
-		}
+	//case *Callback:
+	//	f := src.ToFunction()
+	//	*dst = func(args ...Value) Value {
+	//		return Call(f, args...)
+	//	}
 	case *string:
 		*dst = src.ToString()
 	case *String:

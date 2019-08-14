@@ -48,7 +48,7 @@ func (s String) Equals(other Value) bool {
 	case other.IsString():
 		return s.SameAs(other)
 	case other.IsInt(), other.IsFloat(), other.IsBool():
-		return s.ToNumber().Equals(other)
+		return other.Equals(other)
 	default:
 		return false
 	}

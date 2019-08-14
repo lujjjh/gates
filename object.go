@@ -12,7 +12,7 @@ type getterFunc func(*Runtime, Value) Value
 
 func (g getterFunc) Get(r *Runtime, v Value) Value { return g(r, v) }
 
-func objectGet(r *Runtime, base interface{}, key Value) Value {
+func ObjectGet(r *Runtime, base interface{}, key Value) Value {
 	base = unref(base)
 	g, ok := base.(getter)
 	if !ok {
@@ -25,7 +25,7 @@ func objectGet(r *Runtime, base interface{}, key Value) Value {
 	return g.Get(r, key)
 }
 
-func objectSet(r *Runtime, base interface{}, key, value Value) {
+func ObjectSet(r *Runtime, base interface{}, key, value Value) {
 	base = unref(base)
 	g, ok := base.(setter)
 	if !ok {

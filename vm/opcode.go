@@ -7,6 +7,10 @@ const (
 	OpStoreGlobal
 	OpLoadLocal
 	OpStoreLocal
+	OpArray
+	OpMergeArray
+	OpMap
+	OpMergeMap
 	OpUnaryPlus
 	OpUnaryMinus
 	OpUnaryNot

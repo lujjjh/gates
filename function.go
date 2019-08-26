@@ -119,8 +119,8 @@ func (s *ArgumentScanner) Scan(values ...interface{}) error {
 	argc := len(args)
 	if argc < len(values) {
 		return &ErrTooFewArguments{
-			expected: s.offset + argc,
-			actual:   s.offset + len(values),
+			expected: s.offset + len(values),
+			actual:   s.offset + argc,
 		}
 	}
 	r := s.fc.Runtime()

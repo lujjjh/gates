@@ -215,20 +215,20 @@ func (g *Global) Get(name string) Value {
 }
 
 func Curry(f Function, n int) Function {
-	return FunctionFunc(func(fc FunctionCall) Value {
-		var curriedF Function
-		curriedF = FunctionFunc(func(fc FunctionCall) Value {
-			args := fc.Args()
-			argc := len(args)
-			if argc >= n {
-				return fc.Runtime().Call(f, args...)
-			}
-			return Curry(FunctionFunc(func(fc FunctionCall) Value {
-				return fc.Runtime().Call(f, append(args, fc.Args()...)...)
-			}), n-argc)
-		})
-		return curriedF
+	var curriedF Function
+	curriedF = FunctionFunc(func(fc FunctionCall) Value {
+		args := fc.Args()
+		argc := len(args)
+		if argc >= n {
+			return fc.Runtime().Call(f, args...)
+		}
+		args = make([]Value, argc)
+		copy(args, fc.Args())
+		return Curry(FunctionFunc(func(fc FunctionCall) Value {
+			return fc.Runtime().Call(f, append(args, fc.Args()...)...)
+		}), n-argc)
 	})
+	return curriedF
 }
 
 func CurriedFunctionFunc(n int, f func(FunctionCall) Value) Function {

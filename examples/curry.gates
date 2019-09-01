@@ -5,7 +5,7 @@
 
   let add2 = add(2);
   assert_eq(42, add2(40));
-  assert_eq(42, add2(40));
+  assert_eq(43, add2(41));
 
   let ping = curry(0)(function () { return "pong"; });
   assert_eq("pong", ping());

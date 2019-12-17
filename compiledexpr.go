@@ -3,7 +3,7 @@ package gates
 import (
 	"fmt"
 
-	"github.com/gates/gates/syntax"
+	"github.com/lujjjh/gates/syntax"
 )
 
 type compiledExpr interface {

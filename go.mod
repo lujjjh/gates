@@ -1,4 +1,4 @@
-module github.com/gates/gates
+module github.com/lujjjh/gates
 
 go 1.12
 

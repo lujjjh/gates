@@ -1,6 +1,6 @@
 # Gates
 
-![](https://github.com/lujjjh/gates/workflows/.github/workflows/main.yml/badge.svg)
+![](https://github.com/lujjjh/gates/workflows/Test/badge.svg)
 
 > An embedded language for Go.
 
@@ -13,10 +13,11 @@
 
 ## Comparision
 
-| Features             | Gates | Lua 5.3+                                      | JavaScript |
-|----------------------|:-----:|:---------------------------------------------:|:----------:|
-| Int64 Support        | Y     | Y                                             | N          |
-| Compatible with JSON | Y     | N (hard to distinguish between `[]` and `{}`) | Y          |
+|                       | Gates | Lua 5.3+                                      | JavaScript |
+|-----------------------|:-----:|:---------------------------------------------:|:----------:|
+| Int64 support         | Y     | Y                                             | N          |
+| Compatible with JSON  | Y     | N (hard to distinguish between `[]` and `{}`) | Y          |
+| Easily embedded in Go | Y     | N                                             | N          |
 
 ## Try Gates in Command Line
 

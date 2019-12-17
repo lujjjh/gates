@@ -1,6 +1,6 @@
 # Gates
 
-[![Build Status](https://travis-ci.org/gates/gates.svg?branch=master)](https://travis-ci.org/gates/gates)
+[![Build Status](https://travis-ci.org/lujjjh/gates.svg?branch=master)](https://travis-ci.org/lujjjh/gates)
 
 > An embedded language interacting with Go.
 

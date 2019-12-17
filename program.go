@@ -1,6 +1,6 @@
 package gates
 
-import "github.com/gates/gates/syntax"
+import "github.com/lujjjh/gates/syntax"
 
 type Program struct {
 	src    *syntax.File

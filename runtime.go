@@ -4,7 +4,7 @@ import (
 	"context"
 	"unsafe"
 
-	"github.com/gates/gates/syntax"
+	"github.com/lujjjh/gates/syntax"
 )
 
 type ToNativeOption int

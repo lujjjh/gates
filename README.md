@@ -2,31 +2,29 @@
 
 ![](https://github.com/lujjjh/gates/workflows/.github/workflows/main.yml/badge.svg)
 
-> An embedded language interacting with Go.
+> An embedded language for Go.
 
 ## Features
 
-- Easily embedded in and interacting with Go.
+- Easily embedded in Go.
 - JavaScript-like syntax with native int64 support.
 - First class functions.
 - Execution time limit.
 
-## Why?
+## Comparision
 
-### Why Gates?
+| Features             | Gates | Lua 5.3+                                      | JavaScript |
+|----------------------|:-----:|:---------------------------------------------:|:----------:|
+| Int64 Support        | Y     | Y                                             | N          |
+| Compatible with JSON | Y     | N (hard to distinguish between `[]` and `{}`) | Y          |
 
-Gates is designed to be an interpreted language embedded in Go. It aims to providing a
-relatively controllable VM so that multiple VMs could run _untrusted_ code in the same process
-with maximum execution time set.
+## Try Gates in Command Line
 
-### Why not Lua?
-
-Lua is great except that arrays and maps are both represented as `table`. In our use cases,
-we need to distinguish between empty arrays and empty maps to produce a correct JSON string.
-
-### Why not JavaScript?
-
-int64 :).
+```sh
+$ go get -u github.com/lujjjh/gates/cmd/gates
+$ echo '[1, 2, 3] | map(x => x * x)' | gates
+# 1,4,9
+```
 
 ## Data Types
 

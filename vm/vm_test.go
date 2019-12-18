@@ -16,18 +16,18 @@ func TestVM_Load(t *testing.T) {
 			OpLoadGlobal, 0, 0,
 		},
 	})
-	v.constants = []gates.Value{
-		gates.Int(0),
-		gates.Int(1),
+	v.constants = []interface{}{
+		int64(0),
+		int64(1),
 	}
-	v.globals = []gates.Value{
-		gates.String("foo"),
-		gates.String("bar"),
+	v.globals = []interface{}{
+		"foo",
+		"bar",
 	}
 	assert.NoError(t, v.Run())
-	assert.Equal(t, gates.Null, v.stack[0])
-	assert.Equal(t, gates.Int(1), v.stack[1])
-	assert.Equal(t, gates.String("foo"), v.stack[2])
+	assert.Equal(t, nil, v.stack[0])
+	assert.Equal(t, int64(1), v.stack[1])
+	assert.Equal(t, "foo", v.stack[2])
 }
 
 func TestVM_Store(t *testing.T) {
@@ -37,12 +37,12 @@ func TestVM_Store(t *testing.T) {
 			OpStoreGlobal, 0, 1,
 		},
 	})
-	v.constants = []gates.Value{
-		gates.Int(42),
+	v.constants = []interface{}{
+		int64(42),
 	}
-	v.globals = make([]gates.Value, 2)
+	v.globals = make([]interface{}, 2)
 	assert.NoError(t, v.Run())
-	assert.Equal(t, gates.Int(42), v.globals[1])
+	assert.Equal(t, int64(42), v.globals[1])
 }
 
 func TestVM_Array(t *testing.T) {
@@ -55,24 +55,20 @@ func TestVM_Array(t *testing.T) {
 			OpMergeArray, 2,
 		},
 	})
-	v.constants = []gates.Value{
-		gates.String("foo"),
-		gates.String("bar"),
-		gates.Array{
-			Values: []gates.Value{
-				gates.Int(42),
-				gates.Null,
-			},
+	v.constants = []interface{}{
+		"foo",
+		"bar",
+		[]interface{}{
+			int64(42),
+			nil,
 		},
 	}
 	assert.NoError(t, v.Run())
-	assert.Equal(t, gates.Array{
-		Values: []gates.Value{
-			gates.String("foo"),
-			gates.String("bar"),
-			gates.Int(42),
-			gates.Null,
-		},
+	assert.Equal(t, []interface{}{
+		"foo",
+		"bar",
+		int64(42),
+		nil,
 	}, v.stack[0])
 }
 
@@ -88,20 +84,20 @@ func TestVM_Map(t *testing.T) {
 			OpMergeMap, 2,
 		},
 	})
-	v.constants = []gates.Value{
-		gates.String("foo"),
-		gates.Int(1),
-		gates.String("bar"),
-		gates.Int(2),
-		gates.Map{
-			"baz": gates.Int(3),
+	v.constants = []interface{}{
+		"foo",
+		int64(1),
+		"bar",
+		int64(2),
+		map[string]interface{}{
+			"baz": int64(3),
 		},
 	}
 	assert.NoError(t, v.Run())
-	assert.Equal(t, gates.Map{
-		"foo": gates.Int(1),
-		"bar": gates.Int(2),
-		"baz": gates.Int(3),
+	assert.Equal(t, map[string]interface{}{
+		"foo": int64(1),
+		"bar": int64(2),
+		"baz": int64(3),
 	}, v.stack[0])
 }
 
@@ -115,14 +111,14 @@ func TestVM_Unary(t *testing.T) {
 			OpUnaryNot,
 		},
 	})
-	v.constants = []gates.Value{
-		gates.String("-42.0"),
-		gates.Null,
+	v.constants = []interface{}{
+		"-42.0",
+		nil,
 	}
 	assert.NoError(t, v.Run())
 	assert.Equal(t, 2, v.sp)
-	assert.Equal(t, gates.Float(42), v.stack[0])
-	assert.Equal(t, gates.Bool(true), v.stack[1])
+	assert.Equal(t, float64(42), v.stack[0])
+	assert.Equal(t, true, v.stack[1])
 }
 
 func TestVM_Call_Return(t *testing.T) {
@@ -144,13 +140,13 @@ func TestVM_Call_Return(t *testing.T) {
 			OpCall, 3, // #arguments
 		},
 	})
-	v.constants = []gates.Value{
-		gates.Int(40),
-		gates.Int(2),
+	v.constants = []interface{}{
+		int64(40),
+		int64(2),
 	}
-	v.globals = []gates.Value{
+	v.globals = []interface{}{
 		fn,
 	}
 	assert.NoError(t, v.Run())
-	assert.Equal(t, gates.Int(42), v.stack[v.sp-1])
+	assert.Equal(t, int64(42), v.stack[v.sp-1])
 }

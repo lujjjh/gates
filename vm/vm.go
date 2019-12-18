@@ -3,9 +3,8 @@ package vm
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gates/gates"
-	"math"
-	"strings"
 )
 
 const (
@@ -18,9 +17,9 @@ var (
 )
 
 type VM struct {
-	constants []gates.Value
-	globals   []gates.Value
-	stack     [StackSize]gates.Value
+	constants []interface{}
+	globals   []interface{}
+	stack     [StackSize]interface{}
 	sp        int
 
 	frames      [MaxFrames]Frame
@@ -84,7 +83,7 @@ func (v *VM) run() {
 			v.sp++
 
 		case OpLoadNull:
-			v.stack[v.sp] = gates.Null
+			v.stack[v.sp] = nil
 			v.sp++
 
 		case OpLoadGlobal:
@@ -116,42 +115,38 @@ func (v *VM) run() {
 		case OpArray:
 			v.ip += 2
 			size := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
-			result := make([]gates.Value, size)
+			result := make([]interface{}, size)
 			if size > 0 {
 				copy(result, v.stack[v.sp-size:v.sp])
 			}
 			v.sp -= size
-			v.stack[v.sp] = gates.NewArray(result)
+			v.stack[v.sp] = result
 			v.sp++
 
 		case OpMergeArray:
 			v.ip++
 			numSegments := int(v.curInsts[v.ip])
-			result := make([]gates.Value, 0)
+			result := make([]interface{}, 0)
 			for _, iterable := range v.stack[v.sp-numSegments : v.sp] {
-				it, ok := gates.GetIterator(iterable)
+				it, ok := iterable.([]interface{})
 				if !ok {
 					continue
 				}
-				for {
-					value, ok := it.Next()
-					if !ok {
-						break
-					}
+				for _, value := range it {
 					result = append(result, value)
 				}
 			}
 			v.sp -= numSegments
-			v.stack[v.sp] = gates.NewArray(result)
+			v.stack[v.sp] = result
 			v.sp++
 
 		case OpMap:
 			v.ip += 2
 			size := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
-			result := make(gates.Map, size)
+			result := make(map[string]interface{}, size)
 			offset := size * 2
 			for i := v.sp - offset; i < v.sp; i += 2 {
-				key := v.stack[i].ToString()
+				key := fmt.Sprint(v.stack[i]) // TODO implement toString
 				value := v.stack[i+1]
 				result[key] = value
 			}
@@ -162,20 +157,14 @@ func (v *VM) run() {
 		case OpMergeMap:
 			v.ip++
 			numSegments := int(v.curInsts[v.ip])
-			result := make(gates.Map)
+			result := make(map[string]interface{})
 			for _, iterable := range v.stack[v.sp-numSegments : v.sp] {
-				it, ok := gates.GetIterator(iterable)
+				it, ok := iterable.(map[string]interface{})
 				if !ok {
 					continue
 				}
-				for {
-					base, ok := it.Next()
-					if !ok {
-						break
-					}
-					key := gates.ObjectGet(nil, base, gates.String("key")).ToString()
-					value := gates.ObjectGet(nil, base, gates.String("value"))
-					result[key] = value
+				for k, v := range it {
+					result[k] = v
 				}
 			}
 			v.sp -= numSegments
@@ -183,77 +172,47 @@ func (v *VM) run() {
 			v.sp++
 
 		case OpUnaryPlus:
-			v.stack[v.sp-1] = v.stack[v.sp-1].ToNumber()
+			v.stack[v.sp-1] = toNumber(v.stack[v.sp-1])
 
 		case OpUnaryMinus:
-			n := v.stack[v.sp-1].ToNumber()
-			if n.IsInt() {
-				v.stack[v.sp-1] = gates.Int(-n.ToInt())
-			} else {
-				v.stack[v.sp-1] = gates.Float(-n.ToFloat())
-			}
+			v.stack[v.sp-1] = negate(v.stack[v.sp-1])
 
 		case OpUnaryNot:
-			v.stack[v.sp-1] = gates.Bool(!v.stack[v.sp-1].ToBool())
+			v.stack[v.sp-1] = !toBool(v.stack[v.sp-1])
 
 		case OpBinaryAdd:
 			x, y := v.stack[v.sp-2], v.stack[v.sp-1]
-			if x.IsString() || y.IsString() {
-				v.stack[v.sp-2] = gates.String(x.ToString() + y.ToString())
-			} else if x.IsInt() && y.IsInt() {
-				v.stack[v.sp-2] = gates.Int(x.ToInt() + y.ToInt())
-			} else {
-				v.stack[v.sp-2] = gates.Float(x.ToFloat() + y.ToFloat())
-			}
+			v.stack[v.sp-2] = add(x, y)
 			v.sp--
 
 		case OpBinarySub:
 			x, y := v.stack[v.sp-2], v.stack[v.sp-1]
-			if x.IsInt() && y.IsInt() {
-				v.stack[v.sp-2] = gates.Int(x.ToInt() - y.ToInt())
-			} else {
-				v.stack[v.sp-2] = gates.Float(x.ToFloat() - y.ToFloat())
-			}
+			v.stack[v.sp-2] = sub(x, y)
 			v.sp--
 
 		case OpBinaryMul:
 			x, y := v.stack[v.sp-2], v.stack[v.sp-1]
-			if x.IsInt() && y.IsInt() {
-				xI, yI := x.ToInt(), y.ToInt()
-				res := xI * yI
-				// overflow
-				if xI != 0 && res/xI != yI {
-					v.stack[v.sp-2] = gates.Float(x.ToFloat() * y.ToFloat())
-				} else {
-					v.stack[v.sp-2] = gates.Int(x.ToInt() * y.ToInt())
-				}
-			} else {
-				v.stack[v.sp-2] = gates.Float(x.ToFloat() * y.ToFloat())
-			}
+			v.stack[v.sp-2] = mul(x, y)
 			v.sp--
 
 		case OpBinaryDiv:
 			x, y := v.stack[v.sp-2], v.stack[v.sp-1]
-			v.stack[v.sp-2] = gates.Float(x.ToFloat() / y.ToFloat())
+			v.stack[v.sp-2] = div(x, y)
 			v.sp--
 
 		case OpBinaryMod:
 			x, y := v.stack[v.sp-2], v.stack[v.sp-1]
-			if x.IsInt() && y.IsInt() && y.ToInt() != 0 {
-				v.stack[v.sp-2] = gates.Int(x.ToInt() % y.ToInt())
-			} else {
-				v.stack[v.sp-2] = gates.Float(math.Mod(x.ToFloat(), y.ToFloat()))
-			}
+			v.stack[v.sp-2] = mod(x, y)
 			v.sp--
 
 		case OpBinaryEq:
 			x, y := v.stack[v.sp-2], v.stack[v.sp-1]
-			v.stack[v.sp-2] = gates.Bool(x.Equals(y))
+			v.stack[v.sp-2] = x == y
 			v.sp--
 
 		case OpBinaryNEq:
 			x, y := v.stack[v.sp-2], v.stack[v.sp-1]
-			v.stack[v.sp-2] = gates.Bool(!x.Equals(y))
+			v.stack[v.sp-2] = x != y
 			v.sp--
 
 		case OpBinaryLT:
@@ -304,22 +263,4 @@ func (v *VM) run() {
 			v.stack[v.sp-1] = retVal
 		}
 	}
-}
-
-func less(x, y gates.Value, defaults bool) bool {
-	switch {
-	case x.IsString() && y.IsString():
-		xs, ys := x.ToString(), y.ToString()
-		return strings.Compare(xs, ys) == -1
-	case x.IsInt() && y.IsInt():
-		return x.ToInt() < y.ToInt()
-	}
-
-	nx := x.ToFloat()
-	ny := y.ToFloat()
-
-	if math.IsNaN(nx) || math.IsNaN(ny) {
-		return defaults
-	}
-	return nx < ny
 }

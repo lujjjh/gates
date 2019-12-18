@@ -1,7 +1,7 @@
 package vm
 
 import (
-	"github.com/gates/gates"
+	"github.com/lujjjh/gates"
 )
 
 type Frame struct {

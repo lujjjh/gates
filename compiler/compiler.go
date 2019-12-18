@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/gates/gates"
-	"github.com/gates/gates/syntax"
-	"github.com/gates/gates/vm"
+	"github.com/lujjjh/gates"
+	"github.com/lujjjh/gates/syntax"
+	"github.com/lujjjh/gates/vm"
 )
 
 type Compiler struct {

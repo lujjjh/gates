@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/gates/gates"
+	"github.com/lujjjh/gates"
 )
 
 const (

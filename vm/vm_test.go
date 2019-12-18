@@ -3,7 +3,7 @@ package vm
 import (
 	"testing"
 
-	"github.com/gates/gates"
+	"github.com/lujjjh/gates"
 
 	"github.com/stretchr/testify/assert"
 )

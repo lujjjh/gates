@@ -2,7 +2,7 @@ package gates
 
 import (
 	"context"
-	"github.com/gates/gates/objects"
+	"github.com/lujjjh/gates/objects"
 	"io/ioutil"
 	"strings"
 	"testing"

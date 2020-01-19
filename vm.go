@@ -37,7 +37,8 @@ func (v *valueStack) init() {
 }
 
 func (v *valueStack) expand(idx int) {
-	if idx < len(v.l) {
+	l := len(v.l)
+	if idx < l {
 		return
 	}
 
@@ -47,6 +48,9 @@ func (v *valueStack) expand(idx int) {
 		n := make([]Value, idx+1, (idx+1)<<1)
 		copy(n, v.l)
 		v.l = n
+	}
+	for i := range v.l[l:] {
+		v.l[l+i] = Null
 	}
 }
 

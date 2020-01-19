@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type panicErr struct {
@@ -237,6 +239,18 @@ func TestExceedInstructionLimit(t *testing.T) {
 	if err != ErrCyclesLimitExceeded {
 		t.Errorf("cycles limit exceeded expected")
 	}
+}
+
+func TestValueNotAssigned(t *testing.T) {
+	r := New()
+	src := `(() => {
+	  let f, f1;
+	  f1 = n => { return f1; };
+	  return f;
+	})()`
+	x, err := r.RunString(src)
+	assert.NoError(t, err)
+	assert.Equal(t, nil, x.ToNative())
 }
 
 func BenchmarkRunProgram(b *testing.B) {

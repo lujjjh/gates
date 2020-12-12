@@ -21,7 +21,6 @@ func TestArrayToNative(t *testing.T) {
 }
 
 func TestArrayToNativeCircular(t *testing.T) {
-	assert := assert.New(t)
 	c := NewArray([]Value{Int(1)})
 	a := []Value{nil, Int(1), nil, c, c}
 	b := NewArray(a)
@@ -29,12 +28,22 @@ func TestArrayToNativeCircular(t *testing.T) {
 	a[2] = b
 
 	x := b.ToNative(SkipCircularReference).([]interface{})
-	assert.EqualValues(5, len(x))
-	assert.Nil(x[0])
-	assert.EqualValues(1, x[1])
-	assert.Nil(x[2])
-	assert.EqualValues(1, x[3].([]interface{})[0])
-	assert.EqualValues(1, x[4].([]interface{})[0])
+	assert.EqualValues(t, 5, len(x))
+	assert.Nil(t, x[0])
+	assert.EqualValues(t, 1, x[1])
+	assert.Nil(t, x[2])
+	assert.EqualValues(t, 1, x[3].([]interface{})[0])
+	assert.EqualValues(t, 1, x[4].([]interface{})[0])
+}
+
+func TestArrayToNativeNonCircular(t *testing.T) {
+	v := []Value{Int(1), Int(2)}
+	a := NewArray(v)
+	v[1] = NewArray(v[:1])
+
+	x := a.ToNative(SkipCircularReference).([]interface{})
+	assert.EqualValues(t, 2, len(x))
+	assert.EqualValues(t, 1, x[1].([]interface{})[0])
 }
 
 func TestArrayIterator(t *testing.T) {

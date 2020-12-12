@@ -4,7 +4,6 @@ import (
 	"math"
 	"reflect"
 	"strings"
-	"unsafe"
 )
 
 type Array struct {
@@ -56,22 +55,26 @@ func (a Array) ToNative(ops ...ToNativeOption) interface{} {
 	return toNative(nil, a, convertToNativeOption2BinaryOptions(ops))
 }
 
-func (a Array) toNative(seen map[unsafe.Pointer]interface{}, ops int) interface{} {
+func (a Array) toNative(seen map[interface{}]interface{}, ops int) interface{} {
 	if a.values == nil {
 		return []interface{}(nil)
 	}
-	addr := unsafe.Pointer(reflect.ValueOf(a.values).Pointer())
-	if v, ok := seen[addr]; ok && !checkToNativeOption(SkipCircularReference, ops) {
+	v := reflect.ValueOf(a.values)
+	ptr := struct {
+		ptr uintptr
+		len int
+	}{v.Pointer(), v.Len()}
+	if v, ok := seen[ptr]; ok && !checkToNativeOption(SkipCircularReference, ops) {
 		return v
 	} else if ok {
 		return nil
 	}
 	result := make([]interface{}, len(a.values))
-	seen[addr] = result
+	seen[ptr] = result
 	for i := range a.values {
 		result[i] = toNative(seen, a.values[i], ops)
 	}
-	delete(seen, addr)
+	delete(seen, ptr)
 	return result
 }
 
